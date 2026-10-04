@@ -1,0 +1,11 @@
+id: 01-strings
+title: "Strings: Indexing, Slicing and Methods"
+exercise_type: implement
+language: python
+prerequisites: []
+objectives:
+  - "Get single characters from a string with positive and negative indexes"
+  - "Take substrings with slices, including omitted and out-of-range bounds"
+  - "Build new strings instead of changing existing ones, and keep the results of string methods"
+  - "Clean, split and join text with strip(), lower(), upper(), split(), join() and isalnum()"
+sources: [pytutorial#text, pystdtypes#string-methods]
