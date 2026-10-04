@@ -13,6 +13,5 @@ sources:
     url: https://docs.python.org/3/tutorial/introduction.html
   - id: pystdtypes
     url: https://docs.python.org/3/library/stdtypes.html
-module_size: "45–90 min"
 project_style: independent
 constraints: ["standard library only"]
