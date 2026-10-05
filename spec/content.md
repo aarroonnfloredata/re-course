@@ -143,7 +143,7 @@ A list of 5–7 questions:
 | `type` | `predict-output`, `spot-the-bug` or `multiple-choice` |
 | `prompt` | the question |
 | `code` | required for `predict-output` and `spot-the-bug`; optional otherwise |
-| `options` | 3–4 options |
+| `options` | 3–4 different options, all strings (quote numbers: `"3"`, not `3`) |
 | `answer` | index into `options`, counted from 0 |
 | `explanation` | why the answer is right, addressing the misconceptions behind the wrong options |
 
