@@ -37,6 +37,7 @@ together.
 ```
 <course>/
 ├── course.yaml          # course metadata, read by the runtime
+├── pyproject.toml       # the course's environment; see "Course environment"
 ├── brief.yaml           # workspace only: the hand-written course brief
 ├── sources/             # workspace only: ingested sources
 │   └── <source-id>.md
@@ -74,11 +75,23 @@ sources:
   - id: pytutorial          # source ID used in citations
     url: https://docs.python.org/3/tutorial/introduction.html
 project_style: independent  # or: cumulative
+dependencies: []            # packages the course needs, e.g. ["polars>=1.0"]
 constraints: ["standard library only"]
 ```
 
 Each source has an `id` (lowercase letters, digits, hyphens) and either a
 `url` or a `path` to a local file, relative to the workspace.
+
+`dependencies` is copied into the course's `pyproject.toml`, which defines the
+course's own environment (see "Course environment").
+
+## Course environment
+
+Each course has its own virtual environment, defined by the course's
+`pyproject.toml` and managed by uv. It lists the `learn` runtime
+(`re-course-learn`), the packages from the brief's `dependencies` and the
+Python version. `learn` runs tests, examples and quiz code with that
+environment's interpreter, so course packages are always available.
 
 ## Module layout
 
