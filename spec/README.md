@@ -93,6 +93,9 @@ Each course has its own virtual environment, defined by the course's
 Python version. `learn` runs tests, examples and quiz code with that
 environment's interpreter, so course packages are always available.
 
+The course's `uv.lock` is committed, so every learner gets the same package
+versions. `.venv/` is not.
+
 ## Module layout
 
 ```
