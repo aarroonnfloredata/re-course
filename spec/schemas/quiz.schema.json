@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "quiz.yaml",
+  "description": "A module's quiz. See spec/content.md. Checked by the validator, not by this schema: answer is a valid index into options, objective exists in module.yaml, predict-output code prints the marked option.",
+  "type": "array",
+  "minItems": 5,
+  "maxItems": 7,
+  "items": {
+    "$ref": "#/$defs/question"
+  },
+  "$defs": {
+    "question": {
+      "type": "object",
+      "required": [
+        "id",
+        "objective",
+        "type",
+        "prompt",
+        "options",
+        "answer",
+        "explanation"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^q[1-9][0-9]*$"
+        },
+        "objective": {
+          "description": "Objective number, counted from 1.",
+          "type": "integer",
+          "minimum": 1
+        },
+        "type": {
+          "enum": ["predict-output", "spot-the-bug", "multiple-choice"]
+        },
+        "prompt": {
+          "type": "string",
+          "minLength": 1
+        },
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "options": {
+          "description": "Strings only: quote numbers in YAML (\"3\", not 3).",
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "answer": {
+          "description": "Index into options, counted from 0.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "if": {
+        "properties": {
+          "type": {
+            "enum": ["predict-output", "spot-the-bug"]
+          }
+        }
+      },
+      "then": {
+        "required": ["code"]
+      }
+    }
+  }
+}
