@@ -1,0 +1,19 @@
+# The course's own environment, managed by uv. See spec/README.md
+# ("Course environment").
+[project]
+name = "{{name}}"
+version = "0.1.0"
+description = "{{title}}: a re-course course"
+requires-python = ">=3.12"
+dependencies = [
+    "re-course-learn",
+    # The brief's `dependencies` go here.
+]
+
+[tool.uv]
+package = false  # the course is not a Python package; uv only manages its environment
+
+[tool.uv.sources]
+# Courses live inside re-course (workspace/ or shared-workspace/), so the
+# runtime is always two folders up.
+re-course-learn = { path = "../../runtime", editable = true }

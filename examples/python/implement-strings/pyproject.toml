@@ -1,0 +1,17 @@
+# The course's own environment, managed by uv. See spec/README.md
+# ("Course environment").
+[project]
+name = "implement-strings"
+version = "0.1.0"
+description = "Python Strings: the golden example for the implement exercise type"
+requires-python = ">=3.12"
+dependencies = [
+    "re-course-learn",
+]
+
+[tool.uv]
+package = false  # the course is not a Python package; uv only manages its environment
+
+[tool.uv.sources]
+# The golden example sits three folders below re-course/, not two like a course.
+re-course-learn = { path = "../../../runtime", editable = true }

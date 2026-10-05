@@ -1,0 +1,4 @@
+title: "{{title}}"
+spec_version: 1
+language: "{{language}}"
+modules: []  # module IDs in learning order; filled in from the outline
