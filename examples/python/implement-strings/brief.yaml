@@ -14,4 +14,5 @@ sources:
   - id: pystdtypes
     url: https://docs.python.org/3/library/stdtypes.html
 project_style: independent
+dependencies: []
 constraints: ["standard library only"]
