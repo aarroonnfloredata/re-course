@@ -48,6 +48,7 @@ which is plain Python with no AI.
 
 ## Commands
 
+- Setup check: `python3 forge/doctor.py`
 - Validate a course: `uv run python -m forge.validate <course folder> [module ...]`
   (`--static` skips the checks that run code)
 - Generator tests: `uv run pytest`
