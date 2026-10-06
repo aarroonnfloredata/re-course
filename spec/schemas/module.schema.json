@@ -39,7 +39,8 @@
     "objectives": {
       "description": "Numbered from 1 in this order; everything else refers to them by number.",
       "type": "array",
-      "minItems": 1,
+      "minItems": 3,
+      "maxItems": 5,
       "items": {
         "type": "string",
         "minLength": 1

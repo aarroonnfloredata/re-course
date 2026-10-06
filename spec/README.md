@@ -39,6 +39,7 @@ together.
 ├── course.yaml          # course metadata, read by the runtime
 ├── pyproject.toml       # the course's environment; see "Course environment"
 ├── brief.yaml           # workspace only: the hand-written course brief
+├── outline.yaml         # workspace only: the module plan
 ├── sources/             # workspace only: ingested sources
 │   ├── <source-id>.md
 │   └── raw/             # downloaded originals, reused by ingest
@@ -96,6 +97,44 @@ Optional per source:
 `dependencies` is copied into the course's `pyproject.toml`, which defines the
 course's own environment (see "Course environment").
 
+## `outline.yaml`
+
+The module plan, written by `/outline` from the brief and the sources, and
+approved by the course author before any module is built.
+
+```yaml
+scenario: >-                      # cumulative courses only
+  A log analyzer for a small web server, growing module by module.
+modules:
+  - id: 01-pipes-and-redirection
+    title: Pipes and Redirection
+    exercise_type: implement
+    introduces: [pipes, output redirection, stderr]
+    objectives:                   # 3–5
+      - "Connect commands with |"
+      - "Send output and errors to files"
+      - "Keep errors apart from normal output"
+    prerequisites: []
+    sources: [tlcl#6.1, tlcl#6.2]
+    exercise: >-
+      Count the error lines in access.log and save them to errors.txt.
+left_out:                         # optional
+  - section: tlcl#6.5
+    reason: "tee: not needed for the goals"
+```
+
+- Modules are in learning order and numbered by position (`01-`, `02-`, …).
+- `prerequisites` are earlier modules only.
+- `introduces` lists the concepts a module teaches first; each concept is
+  introduced by one module only.
+- Every cited section, in `sources` and `left_out`, exists in `sources/`. A
+  section is either used or left out, not both.
+- A cumulative course has a `scenario`, and each module's `exercise` says
+  what it adds to it.
+- Approving the outline (`uv run python -m forge.outline approve <course>`)
+  writes the module IDs into `course.yaml`. `/build-module` creates each
+  `module.yaml` from its outline entry.
+
 ## Course environment
 
 Each course has its own virtual environment, defined by the course's
@@ -137,15 +176,19 @@ title: "Strings: Indexing, Slicing and Methods"
 exercise_type: implement
 language: python
 prerequisites: []                 # module IDs
-objectives:
+objectives:                       # 3–5
   - "Get single characters from a string with positive and negative indexes"
   - "Take substrings with slices, including omitted and out-of-range bounds"
+  - "Build new strings instead of changing existing ones, and keep the results of string methods"
 sources: [pytutorial#text, pystdtypes#string-methods]
 checkpoint: checkpoints/03/       # optional; cumulative courses only
 ```
 
 - `exercise_type` names the file in `exercise-types/` that applies.
+- A module has 3–5 objectives.
 - `sources` lists exactly the citation IDs the lesson uses.
+- `id`, `title`, `exercise_type`, `prerequisites`, `objectives` and `sources`
+  match the module's entry in `outline.yaml`.
 - `checkpoint` is not yet specified; see `exercises.md`.
 
 ## Objectives
