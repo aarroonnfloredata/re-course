@@ -1,8 +1,9 @@
 """Helpers for /outline.
 
-    uv run python -m forge.outline sections <course>   # each source's sections
     uv run python -m forge.outline show <course>       # the outline, for review
     uv run python -m forge.outline approve <course>    # check it, write course.yaml modules
+
+A source's sections: see forge/sources.py.
 """
 
 import re
@@ -14,33 +15,11 @@ import yaml
 
 from .validate import validate
 
-HEADING = re.compile(r"^(#{1,6}) (.*?) \{#([^}]+)\}\s*$")
 WIDTH = 79
 
 
 class OutlineError(Exception):
     pass
-
-
-def sections(course_dir):
-    """Each source's headings with their IDs and word counts, indented by level."""
-    lines = []
-    for path in sorted(Path(course_dir, "sources").glob("*.md")):
-        text = path.read_text(encoding="utf-8")
-        body = text.split("---\n", 2)[2] if text.startswith("---\n") else text
-        found, current = [], None
-        for line in body.split("\n"):
-            match = HEADING.match(line)
-            if match:
-                current = [len(match.group(1)), match.group(2), match.group(3), 0]
-                found.append(current)
-            elif current is not None:
-                current[3] += len(line.split())
-        lines.append(f"{path.stem} ({len(body.split()):,} words)")
-        for level, title, section_id, words in found:
-            lines.append(f"{'  ' * (level - 1)}  #{section_id}  {title}  ({words:,} words)")
-        lines.append("")
-    return "\n".join(lines).rstrip() + "\n"
 
 
 def show(course_dir):
@@ -112,9 +91,9 @@ def wrapped(label, text, indent=None):
 
 def main(argv=None):
     args = argv if argv is not None else sys.argv[1:]
-    commands = {"sections": sections, "show": show, "approve": approve}
+    commands = {"show": show, "approve": approve}
     if len(args) != 2 or args[0] not in commands:
-        print("usage: python -m forge.outline {sections|show|approve} <course>", file=sys.stderr)
+        print("usage: python -m forge.outline {show|approve} <course>", file=sys.stderr)
         return 2
     command, course_dir = args
     try:
