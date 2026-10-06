@@ -1,0 +1,19 @@
+modules:
+  - id: 01-strings
+    title: "Strings: Indexing, Slicing and Methods"
+    exercise_type: implement
+    introduces: [indexing, negative indexes, slicing, immutability, string methods]
+    objectives:
+      - "Get single characters from a string with positive and negative indexes"
+      - "Take substrings with slices, including omitted and out-of-range bounds"
+      - "Build new strings instead of changing existing ones, and keep the results of string methods"
+      - "Clean, split and join text with strip(), lower(), upper(), split(), join() and isalnum()"
+    prerequisites: []
+    sources: [pytutorial#text, pystdtypes#string-methods]
+    exercise: >-
+      Write three text helpers in exercise/text_tools.py: initials() for names,
+      slugify() for titles, and mask() to hide all but the last characters of
+      a number.
+left_out:
+  - section: pystdtypes#textseq
+    reason: "String literal forms and the str() constructor: the learner already writes strings"
