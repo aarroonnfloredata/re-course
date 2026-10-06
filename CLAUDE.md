@@ -64,5 +64,5 @@ which is plain Python with no AI.
   (`--static` skips the checks that run code; `--outline` checks only the
   brief and outline)
 - Generator tests: `uv run pytest`
-- Runtime tests: `cd runtime && uv run --no-project --with-editable . --with pytest pytest`
+- Runtime tests: `cd runtime && uv run --no-project --with-editable '.[bash]' --with pytest pytest`
 - Try a course: `cd <course folder> && uv run learn next`

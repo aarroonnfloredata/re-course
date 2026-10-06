@@ -16,7 +16,8 @@ change.
 
 - Each unit the learner writes (a function, a script) is a stub: a `TODO`
   comment and the language's way of saying "not written yet" (Python:
-  `raise NotImplementedError`).
+  `raise NotImplementedError`; bash: print `<unit> is not written yet.` to
+  stderr and exit or return with status 1).
 - The stub's documentation states the full behaviour, including edge cases,
   with examples. Tests check only behaviour stated there.
 - A starter file needs only what the lesson (or an earlier module) covered.
@@ -61,6 +62,8 @@ expected and what came back:
 
 - Values are shown as the language writes them in code (Python: `repr`), so
   `'2'` and `2` look different.
+- Printed output and file contents are shown as indented lines below the
+  sentence that introduces them.
 - A failure may add one line starting with `Hint:`.
 - No stack traces of the test code.
 
@@ -76,6 +79,9 @@ solution/
 └── exercise/text_tools.py
 ```
 
+When the language has a linter (bash: ShellCheck), solution files get no
+advice from it.
+
 ## Broken variants
 
 Each variant is one plausible learner mistake, used to prove the tests catch
@@ -89,7 +95,8 @@ broken/
 
 - A variant holds full copies of only the files it changes. It is applied on
   top of `solution/`.
-- Each changed file starts with a comment `Broken variant: <what is wrong>`.
+- Each changed file starts with a comment `Broken variant: <what is wrong>`,
+  after the `#!` line if the file has one.
 - At least one variant per unit the learner writes in `exercise/`.
   Challenges have no variants.
 

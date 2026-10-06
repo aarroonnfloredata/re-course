@@ -91,7 +91,7 @@ fixing.
 
 ## What's supported
 
-- **Course languages:** Python. Bash is next.
+- **Course languages:** Python & Bash.
 - **Exercise type:** implement: the learner writes code from scratch.
 - **Sources:** HTML pages, PDFs (best with a table of contents, which
   defines the sections), and local Markdown or text files.
@@ -113,7 +113,7 @@ fixing.
 
 ```
 uv run pytest                                                         # generator tests
-cd runtime && uv run --no-project --with-editable . --with pytest pytest   # runtime tests
+cd runtime && uv run --no-project --with-editable '.[bash]' --with pytest pytest   # runtime tests
 ```
 
 `CLAUDE.md` holds the rules for Claude Code when working in this repository.
