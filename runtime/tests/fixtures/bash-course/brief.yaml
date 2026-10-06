@@ -1,5 +1,6 @@
 # A one-module bash course for testing the bash plugin, the validator and
-# the setup check. Not a teaching example: its lesson is short on purpose.
+# the setup check. Not a teaching example: its lesson is padded to the
+# minimum length.
 
 title: Bash Fixture
 spec_version: 1

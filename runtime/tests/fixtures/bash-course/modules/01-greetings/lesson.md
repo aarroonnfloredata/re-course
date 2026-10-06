@@ -1,6 +1,34 @@
 # Greetings
 
-A fixture for testing the bash plugin. Its lesson is short on purpose.
+A fixture for testing the bash plugin. The next paragraph only pads the
+lesson to the minimum length.
+
+Writing more so lesson length check passes. Writing more so lesson length check
+passes. Writing more so lesson length check passes. Writing more so lesson
+length check passes. Writing more so lesson length check passes. Writing more
+so lesson length check passes. Writing more so lesson length check passes.
+Writing more so lesson length check passes. Writing more so lesson length check
+passes. Writing more so lesson length check passes. Writing more so lesson
+length check passes. Writing more so lesson length check passes. Writing more
+so lesson length check passes. Writing more so lesson length check passes.
+Writing more so lesson length check passes. Writing more so lesson length check
+passes. Writing more so lesson length check passes. Writing more so lesson
+length check passes. Writing more so lesson length check passes. Writing more
+so lesson length check passes. Writing more so lesson length check passes.
+Writing more so lesson length check passes. Writing more so lesson length check
+passes. Writing more so lesson length check passes. Writing more so lesson
+length check passes. Writing more so lesson length check passes. Writing more
+so lesson length check passes. Writing more so lesson length check passes.
+Writing more so lesson length check passes. Writing more so lesson length check
+passes. Writing more so lesson length check passes. Writing more so lesson
+length check passes. Writing more so lesson length check passes. Writing more
+so lesson length check passes. Writing more so lesson length check passes.
+Writing more so lesson length check passes. Writing more so lesson length check
+passes. Writing more so lesson length check passes. Writing more so lesson
+length check passes. Writing more so lesson length check passes. Writing more
+so lesson length check passes. Writing more so lesson length check passes.
+Writing more so lesson length check passes. Writing more so lesson length check
+passes. Writing more so lesson length check passes.
 
 By the end of this module you can:
 
