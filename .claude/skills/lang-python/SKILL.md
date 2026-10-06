@@ -1,6 +1,6 @@
 ---
 name: lang-python
-description: How to write Python course material for re-course - starter stubs, challenge and exercise tests (pytest), solutions, broken variants, runnable lesson examples and predict-output quiz code. Use when writing or fixing any of these for a module with `language: python`.
+description: "How to write Python course material for re-course - starter stubs, challenge and exercise tests (pytest), solutions, broken variants, runnable lesson examples and predict-output quiz code. Use when writing or fixing any of these for a module with `language: python`."
 ---
 
 # Python course material
@@ -176,6 +176,8 @@ Lesson `python run` blocks and quiz `code` run on their own with
 
 ## Checking your work
 
+- Run a snippet, or a documented example against your solution, in the
+  course's environment: `uv run python -c ...` in the course folder.
 - `learn check` in the workspace shows the learner's view: with the starter
   files, every test fails, each with a plain message.
 - The validator (`forge/validate/`) runs the solution and broken-variant
