@@ -7,6 +7,7 @@ their results come back to check_results().
 
 import json
 import re
+import tomllib
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -79,9 +80,12 @@ def check_course(course_dir):
     source_ids = check_brief(brief, section) if isinstance(brief, dict) else set()
     if brief is not None and not isinstance(brief, dict):
         section.add("brief.yaml: must be a mapping")
-    if not (course_dir / "pyproject.toml").is_file():
+    pyproject = course_dir / "pyproject.toml"
+    if not pyproject.is_file():
         section.add('pyproject.toml: missing, so the course has no environment '
                     '(spec/README.md, "Course environment")')
+    elif isinstance(brief, dict):
+        check_pyproject(pyproject, brief, section)
     if problems:
         return section, None
 
@@ -120,6 +124,25 @@ def check_brief(brief, section):
         if ("url" in source) == ("path" in source):
             section.add(f"brief.yaml: sources/{index}: needs either a url or a path")
     return ids
+
+
+def check_pyproject(path, brief, section):
+    """The course environment lists the runtime and every dependency in the brief."""
+    try:
+        listed = tomllib.loads(path.read_text(encoding="utf-8")).get("project", {}).get("dependencies", [])
+    except tomllib.TOMLDecodeError as error:
+        section.add(f"pyproject.toml: not valid TOML: {error}")
+        return
+    if "re-course-learn" not in listed:
+        section.add("pyproject.toml: dependencies must include re-course-learn")
+    wanted = brief.get("dependencies") or []
+    if not isinstance(wanted, list):
+        section.add("brief.yaml: dependencies must be a list")
+        return
+    for dependency in wanted:
+        if dependency not in listed:
+            section.add(f"pyproject.toml: doesn't list {dependency!r} from brief.yaml; "
+                        "run `uv run python -m forge.dependencies <course>`")
 
 
 # Module: checks that don't run code
