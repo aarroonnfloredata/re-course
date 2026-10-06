@@ -40,6 +40,8 @@ class Course:
     language: str
     module_ids: list[str]
     source_ids: set[str]
+    project_style: str | None = None
+    outline: dict | None = None  # module ID -> outline entry, when outline.yaml is usable
 
 
 @dataclass
@@ -74,6 +76,8 @@ def check_course(course_dir):
     data = load_yaml(course_dir / "course.yaml", section)
     problems = schema_problems("course", data) if data is not None else ["unusable"]
     for problem in problems if data is not None else []:
+        if problem.startswith("modules: [] "):
+            problem = "modules: no modules yet; run /outline and approve the outline"
         section.add(f"course.yaml: {problem}")
 
     brief = load_yaml(course_dir / "brief.yaml", section)
@@ -89,10 +93,12 @@ def check_course(course_dir):
     if problems:
         return section, None
 
-    course = Course(course_dir, data["language"], data["modules"], source_ids)
+    project_style = brief.get("project_style") if isinstance(brief, dict) else None
+    course = Course(course_dir, data["language"], data["modules"], source_ids, project_style)
     for module_id in course.module_ids:
         if not (course_dir / "modules" / module_id).is_dir():
-            section.add(f"course.yaml: module {module_id} has no folder modules/{module_id}/")
+            section.add(f"module {module_id} is not built yet (no modules/{module_id}/); "
+                        f"run /build-module {module_id[:2]}")
     modules_dir = course_dir / "modules"
     if modules_dir.is_dir():
         for folder in sorted(modules_dir.iterdir()):
@@ -178,6 +184,14 @@ def check_module(course, module_dir):
             files.add(f"module.yaml: prerequisite {prerequisite} is not an earlier module")
     if not (SPEC / "exercise-types" / f"{data['exercise_type']}.md").is_file():
         files.add(f"module.yaml: no spec for exercise type {data['exercise_type']!r}")
+    if course.outline is not None:
+        planned = course.outline.get(module_dir.name)
+        if planned is None:
+            files.add("outline.yaml: has no entry for this module")
+        else:
+            for key in ("title", "exercise_type", "prerequisites", "objectives", "sources"):
+                if data[key] != planned[key]:
+                    files.add(f"module.yaml: `{key}` doesn't match outline.yaml")
 
     module = Module(course, module_dir, data)
     module.learner_files = (
