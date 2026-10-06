@@ -18,6 +18,6 @@ sources:
   - id: TODO  # short ID used in citations, e.g. pytutorial
     url: TODO  # or `path:` to a local file, relative to this folder
 
-project_style: independent  # or: cumulative (see spec/exercises.md)
+project_style: cumulative  # or: independent (see spec/exercises.md)
 dependencies: []  # packages the course needs, e.g. ["polars>=1.0"]
 constraints: []

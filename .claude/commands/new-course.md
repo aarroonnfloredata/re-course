@@ -29,8 +29,11 @@ together with the author. The name comes from `$ARGUMENTS` if given.
      names; never invent one. Give each a short `id` (lowercase letters,
      digits, hyphens) and a `url`, or a `path` relative to the workspace.
      Mention that the author is responsible for the sources' copyright.
-   - `project_style`: `independent`, or `cumulative` for one scenario across
-     the course (see `spec/exercises.md`).
+   - `project_style`: `cumulative` (the default), where the exercises extend
+     one scenario across the course; or `independent`, where each module's
+     exercise stands alone (see `spec/exercises.md`). Suggest `independent`
+     only when the topics share no natural scenario or modules may be taken
+     in any order.
    - `dependencies`: packages beyond the standard library, if any.
    - `constraints`: anything else the course must respect.
 
