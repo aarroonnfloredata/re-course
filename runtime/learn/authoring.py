@@ -14,6 +14,8 @@ Jobs:
     {"kind": "objectives", "module": "<dir>"}
     {"kind": "stubs", "language": "python", "file": "<path>"}
     {"kind": "changed", "language": "python", "original": "<path>", "changed": "<path>"}
+    {"kind": "lint", "language": "bash", "folder": "<dir>", "files": ["<path>", ...]}
+        (null when the language has no linter)
 """
 
 import json
@@ -45,6 +47,11 @@ def run_job(job):
     if kind == "changed":
         plugin = languages.get(job["language"])
         return plugin.changed_units(Path(job["original"]), Path(job["changed"]))
+    if kind == "lint":
+        plugin = languages.get(job["language"])
+        if not hasattr(plugin, "lint"):
+            return None
+        return plugin.lint(Path(job["folder"]), job["files"])
     raise ValueError(f"unknown job kind {kind!r}")
 
 
