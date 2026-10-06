@@ -40,7 +40,8 @@ together.
 ├── pyproject.toml       # the course's environment; see "Course environment"
 ├── brief.yaml           # workspace only: the hand-written course brief
 ├── sources/             # workspace only: ingested sources
-│   └── <source-id>.md
+│   ├── <source-id>.md
+│   └── raw/             # downloaded originals, reused by ingest
 └── modules/
     └── <module-id>/     # see "Module layout"
 ```
@@ -74,13 +75,23 @@ goals:
 sources:
   - id: pytutorial          # source ID used in citations
     url: https://docs.python.org/3/tutorial/introduction.html
+    license: "PSF License Version 2"   # optional
+    selector: "div.body"               # optional; HTML pages only
 project_style: independent  # or: cumulative (the template's default)
 dependencies: []            # packages the course needs, e.g. ["polars>=1.0"]
 constraints: ["standard library only"]
 ```
 
 Each source has an `id` (lowercase letters, digits, hyphens) and either a
-`url` or a `path` to a local file, relative to the workspace.
+`url` or a `path` to a local file, relative to the workspace. One source is
+one page or one file; a site with many pages is listed as several sources.
+
+Optional per source:
+
+- `license`: what the source allows. Copied into the ingested file; without
+  it, ingest writes "unknown: check before publishing".
+- `selector`: a CSS selector for the page's main content, for when ingest's
+  automatic choice picks up menus or footers.
 
 `dependencies` is copied into the course's `pyproject.toml`, which defines the
 course's own environment (see "Course environment").
@@ -149,19 +160,17 @@ to them by number:
 
 ## Sources
 
-The ingest step writes one Markdown file per source, `sources/<source-id>.md`:
+Ingest (`uv run python -m forge.ingest <course>`) writes one Markdown file per
+source, `sources/<source-id>.md`, and keeps downloaded originals in
+`sources/raw/`. Supported: HTML pages, PDFs, and local Markdown or text files.
 
 ```markdown
 ---
 id: pytutorial
-title: "The Python Tutorial: 3. An Informal Introduction to Python"
-url: https://docs.python.org/3/tutorial/introduction.html
-version: "3.14"
-retrieved: 2026-10-04
-license: >-
-  © Copyright 2001 Python Software Foundation. Licensed under the Python
-  Software Foundation License Version 2.
-excerpt: "Section 3.1.2 only"   # optional; present when not the whole source
+title: 3. An Informal Introduction to Python — Python 3.14.8 documentation
+url: https://docs.python.org/3/tutorial/introduction.html   # or: path
+retrieved: 2026-10-06
+license: PSF License Version 2
 ---
 
 ## 3.1.2. Text {#text}
@@ -169,14 +178,26 @@ excerpt: "Section 3.1.2 only"   # optional; present when not the whole source
 ...
 ```
 
+- Ingest writes `id`, `title`, `url` or `path`, `retrieved` and `license`.
+  A hand-made file may add `version`, and `excerpt` when it holds only part
+  of the source; omitted text is then marked `[…]`.
 - Every section that can be cited has a heading ending in `{#<section-id>}`.
 - A section includes everything up to the next heading of the same or higher
   level.
-- Omitted text inside an excerpt is marked `[…]`.
+- Ingest rewrites the file on every run. Fix problems through the brief
+  (e.g. a `selector`), not by editing the file.
 
-**Citation IDs** are `<source-id>#<section-id>`. The section ID is the
-source's own anchor or section number where it has one (`pytutorial#text`
-matches `introduction.html#text`), otherwise a slug of the heading.
+**Citation IDs** are `<source-id>#<section-id>`. Ingest takes the section ID
+from the source itself, so it stays the same between runs:
+
+- **HTML:** the heading's anchor: its own `id`, an anchor inside it, the `id`
+  of the section that wraps it, or an empty anchor just before it
+  (`pytutorial#text` matches `introduction.html#text`).
+- **PDF:** the PDF's table of contents. The ID is the section number when the
+  title starts with one (`7.3`); without a table of contents, each page is a
+  section (`page-12`).
+- **Markdown:** an existing `{#id}`.
+- Otherwise a slug of the heading. Duplicates get `-2`, `-3`, ….
 
 ## Runtime commands
 

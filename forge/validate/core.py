@@ -123,6 +123,9 @@ def check_brief(brief, section):
             ids.add(source_id)
         if ("url" in source) == ("path" in source):
             section.add(f"brief.yaml: sources/{index}: needs either a url or a path")
+        for optional in ("license", "selector"):
+            if optional in source and not (isinstance(source[optional], str) and source[optional].strip()):
+                section.add(f"brief.yaml: sources/{index}: {optional} must be text")
     return ids
 
 
