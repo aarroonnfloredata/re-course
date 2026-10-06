@@ -20,6 +20,15 @@ def course(tmp_path):
     return target
 
 
+@pytest.fixture
+def root(tmp_path):
+    """A minimal copy of re-course: the template, the real runtime and an empty workspace."""
+    shutil.copytree(ROOT / "templates", tmp_path / "templates")
+    (tmp_path / "runtime").symlink_to(ROOT / "runtime")
+    (tmp_path / "workspace").mkdir()
+    return tmp_path
+
+
 def edit(path, old, new):
     """Replace the first `old` in a file, failing if it isn't there."""
     text = path.read_text()

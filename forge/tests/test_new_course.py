@@ -1,22 +1,12 @@
-import shutil
 import tomllib
 
 import pytest
 import yaml
-from conftest import ROOT, edit
+from conftest import edit
 
 from forge import dependencies
 from forge.new_course import NewCourseError, create
 from forge.validate import validate
-
-
-@pytest.fixture
-def root(tmp_path):
-    """A minimal copy of re-course: the template, the real runtime and an empty workspace."""
-    shutil.copytree(ROOT / "templates", tmp_path / "templates")
-    (tmp_path / "runtime").symlink_to(ROOT / "runtime")
-    (tmp_path / "workspace").mkdir()
-    return tmp_path
 
 
 def test_create(root):
