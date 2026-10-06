@@ -13,6 +13,7 @@ Courses are generated here with Claude Code. Learners take them with
 - [uv](https://docs.astral.sh/uv/getting-started/installation/). It also
   provides Python, so nothing else needs installing for Python.
 - [git](https://git-scm.com/downloads)
+- bash, for bash courses. macOS and Linux come with it.
 - [Claude Code](https://docs.claude.com/en/docs/claude-code/setup), with
   your own access. Only needed to build courses, not to take them.
 
