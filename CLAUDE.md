@@ -55,6 +55,7 @@ which is plain Python with no AI.
 - Build a module: `/build-module <name> <module>` (uses `uv run python -m forge.build init ...`)
 - Take a course as a learner: `uv run python -m forge.trial <course folder>`, then
   `cd <course folder>-trial && uv run learn next`
+- Publish a course: `/publish <name>` (uses `uv run python -m forge.publish <course folder>`)
 - Read sources by section: `uv run python -m forge.sources list <course folder>`,
   `uv run python -m forge.sources show <course folder> <source-id#section-id>`
 - After changing a brief's `dependencies`: `uv run python -m forge.dependencies <course folder>`
