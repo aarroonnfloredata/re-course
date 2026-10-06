@@ -44,9 +44,8 @@ you the course folder (`workspace/<course>/`) and the module ID; its
 - Every factual claim cites a section you have read. Never cite from memory.
   If the sources don't support something the objectives need, say so in your
   report instead of writing it uncited.
-- Run every example and every `predict-output` snippet in the course's
-  environment (`uv run python -c ...` in the course folder) and copy the
-  real output.
+- Run every example and every `predict-output` snippet the way the
+  validator does (the language skill says how) and copy the real output.
 - Don't write tests, solutions or broken variants. Other agents write those
   from your starter files, so the starter documentation must be complete.
 

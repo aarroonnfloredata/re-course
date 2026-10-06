@@ -38,8 +38,8 @@ documentation, not from what the tests happen to check.
 
 ## Check, then report
 
-Without the tests: in the course folder, run every documented example
-against your solution (`uv run python -c ...`) and confirm the results. For
+Without the tests: run every documented example against your solution (the
+language skill says how) and confirm the results. For
 each variant, find a documented example or edge case it gets wrong.
 
 Report briefly: the files you wrote, for each variant the documented
