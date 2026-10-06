@@ -58,8 +58,10 @@ which is plain Python with no AI.
 - Read sources by section: `uv run python -m forge.sources list <course folder>`,
   `uv run python -m forge.sources show <course folder> <source-id#section-id>`
 - After changing a brief's `dependencies`: `uv run python -m forge.dependencies <course folder>`
-- Validate a course: `uv run python -m forge.validate <course folder> [module ...]`
-  (`--static` skips the checks that run code)
+- Validate a course: `/validate <name> [module ...]`, or
+  `uv run python -m forge.validate <course folder> [module ...]`
+  (`--static` skips the checks that run code; `--outline` checks only the
+  brief and outline)
 - Generator tests: `uv run pytest`
 - Runtime tests: `cd runtime && uv run --no-project --with-editable . --with pytest pytest`
 - Try a course: `cd <course folder> && uv run learn next`
