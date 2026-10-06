@@ -14,6 +14,7 @@ from pathlib import Path
 import yaml
 from jsonschema import Draft202012Validator
 
+from ..dependencies import runtime_requirement
 from .report import Section
 
 SPEC = Path(__file__).resolve().parents[2] / "spec"
@@ -89,7 +90,8 @@ def check_course(course_dir):
         section.add('pyproject.toml: missing, so the course has no environment '
                     '(spec/README.md, "Course environment")')
     elif isinstance(brief, dict):
-        check_pyproject(pyproject, brief, section)
+        language = data.get("language") if isinstance(data, dict) else None
+        check_pyproject(pyproject, brief, language, section)
     if problems:
         return section, None
 
@@ -135,15 +137,18 @@ def check_brief(brief, section):
     return ids
 
 
-def check_pyproject(path, brief, section):
-    """The course environment lists the runtime and every dependency in the brief."""
+def check_pyproject(path, brief, language, section):
+    """The course environment lists the runtime (with its extra for the course's
+    language, if any) and every dependency in the brief."""
     try:
         listed = tomllib.loads(path.read_text(encoding="utf-8")).get("project", {}).get("dependencies", [])
     except tomllib.TOMLDecodeError as error:
         section.add(f"pyproject.toml: not valid TOML: {error}")
         return
-    if "re-course-learn" not in listed:
-        section.add("pyproject.toml: dependencies must include re-course-learn")
+    runtime = runtime_requirement(language)
+    if runtime not in listed:
+        section.add(f"pyproject.toml: dependencies must include {runtime}; "
+                    "run `uv run python -m forge.dependencies <course>`")
     wanted = brief.get("dependencies") or []
     if not isinstance(wanted, list):
         section.add("brief.yaml: dependencies must be a list")
@@ -489,9 +494,10 @@ def check_solutions(module):
             if not path.startswith("exercise/") or path not in learner:
                 section.add(f"broken/{variant.name}/{path}: variants may only change "
                             "existing files in exercise/")
-            elif "Broken variant:" not in (variant / path).read_text(encoding="utf-8").split("\n", 1)[0]:
+            elif "Broken variant:" not in first_line(variant / path):
                 section.add(f"broken/{variant.name}/{path}: the first line must be a "
-                            "'Broken variant: <what is wrong>' comment")
+                            "'Broken variant: <what is wrong>' comment (after the #! line, "
+                            "if any)")
     if not module.variants:
         section.add("broken/: no variants")
     section.note = f"{len(module.variants)} broken variants"
@@ -508,6 +514,8 @@ def jobs(module):
         "starter": {"kind": "tests", "module": str(module.dir)},
         "objectives": {"kind": "objectives", "module": str(module.dir)},
         "snippets": {"kind": "snippets", "language": language, "codes": codes},
+        "lint": {"kind": "lint", "language": language, "folder": str(module.dir),
+                 "files": [f"solution/{path}" for path in files_under(module.dir / "solution")]},
     }
     for path in module.learner_files:
         if path.startswith("exercise/"):
@@ -525,9 +533,12 @@ def jobs(module):
 
 
 def check_results(module, results):
-    return [check_examples(module, results["snippets"]),
-            check_tests(module, results),
-            check_variant_coverage(module, results)]
+    sections = [check_examples(module, results["snippets"]),
+                check_tests(module, results),
+                check_variant_coverage(module, results)]
+    if results["lint"] is not None:  # None: the language has no linter
+        sections.append(check_lint(results["lint"]))
+    return sections
 
 
 def check_examples(module, result):
@@ -589,6 +600,17 @@ def check_tests(module, results):
     return section
 
 
+def check_lint(result):
+    """Solutions get no advice from the language's linter (bash: ShellCheck)."""
+    section = Section("linter")
+    if job_failed(result, section):
+        return section
+    for finding in result:
+        section.add(finding)
+    section.note = "on solution/"
+    return section
+
+
 def check_variant_coverage(module, results):
     section = Section("variant coverage")
     units, changed_by = [], {}
@@ -598,14 +620,15 @@ def check_variant_coverage(module, results):
         elif name.startswith("changed:") and not job_failed(result, section):
             _, variant, path = name.split(":", 2)
             if not result:
-                section.add(f"broken/{variant}/{path}: changes no function of the solution")
+                section.add(f"broken/{variant}/{path}: changes no function or script of "
+                            "the solution")
             for unit in result:
                 changed_by.setdefault(unit, []).append(variant)
     if not units:
         section.add("exercise/: no stubs found; each unit the learner writes must be a stub")
     for unit in units:
         if unit not in changed_by:
-            section.add(f"{unit}() has no broken variant")
+            section.add(f"no broken variant changes {unit}")
     section.note = f"{len(units)} units in exercise/"
     return section
 
@@ -643,6 +666,12 @@ def files_under(folder):
                 and not any(part.startswith(".") for part in relative.parts):
             paths.append(relative.as_posix())
     return sorted(paths)
+
+
+def first_line(path):
+    """A file's first line, or its second when the first is a #! line."""
+    lines = path.read_text(encoding="utf-8").split("\n", 2)
+    return lines[1] if lines[0].startswith("#!") and len(lines) > 1 else lines[0]
 
 
 def prose(text):
