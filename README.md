@@ -13,6 +13,7 @@ Courses are generated here with Claude Code. Learners take them with
 - [uv](https://docs.astral.sh/uv/getting-started/installation/). It also
   provides Python, so nothing else needs installing for Python.
 - [git](https://git-scm.com/downloads)
+- bash, for bash courses. macOS and Linux come with it.
 - [Claude Code](https://docs.claude.com/en/docs/claude-code/setup), with
   your own access. Only needed to build courses, not to take them.
 
@@ -91,10 +92,35 @@ fixing.
 
 ## What's supported
 
-- **Course languages:** Python. Bash is next.
+- **Course languages:** Python & Bash.
 - **Exercise type:** implement: the learner writes code from scratch.
 - **Sources:** HTML pages, PDFs (best with a table of contents, which
   defines the sections), and local Markdown or text files.
+
+## Adding a language
+
+A language needs a runtime plugin and a skill. Bash is a worked example of
+both.
+
+1. **Runtime plugin:** `runtime/learn/languages/<language>.py`, registered in
+   `PLUGINS` in that folder's `__init__.py`. The `__init__.py` docstring
+   lists what a plugin provides: running tests and snippets, an optional
+   linter, and finding stubs for the validator. Tests can stay pytest files,
+   as in bash.
+2. **Extra packages:** if courses in the language need packages from PyPI
+   (bash needs ShellCheck), add an extra named after the language in
+   `runtime/pyproject.toml`. New courses then get `re-course-learn[<language>]`.
+3. **Skill:** `.claude/skills/lang-<language>/SKILL.md`, covering starter
+   files and stubs, tests, solutions, broken variants and runnable examples.
+   Start from `lang-python` or `lang-bash`.
+4. **Spec:** add the language's stub form to "Starter files" in
+   `spec/exercises.md`.
+5. **Fixture and tests:** a one-module course in `runtime/tests/fixtures/`
+   whose starter fails, solution passes and broken variants are caught;
+   runtime tests for the plugin; a generator test that the validator passes
+   the fixture.
+6. **Setup check:** in `forge/doctor.py`, check any tool the language needs
+   from the system, and try the fixture's environment.
 
 ## Where things are
 
@@ -113,7 +139,7 @@ fixing.
 
 ```
 uv run pytest                                                         # generator tests
-cd runtime && uv run --no-project --with-editable . --with pytest pytest   # runtime tests
+cd runtime && uv run --no-project --with-editable '.[bash]' --with pytest pytest   # runtime tests
 ```
 
 `CLAUDE.md` holds the rules for Claude Code when working in this repository.

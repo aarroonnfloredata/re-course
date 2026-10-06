@@ -30,7 +30,7 @@ def test_create(root):
     "name, language, message",
     [
         ("Demo Course", "python", "use lowercase letters"),
-        ("demo", "cobol", "no runtime plugin for 'cobol'; supported: python"),
+        ("demo", "cobol", "no runtime plugin for 'cobol'; supported: bash, python"),
     ],
 )
 def test_create_rejects(root, name, language, message):
@@ -52,6 +52,13 @@ def test_dependencies_sync(root):
     listed = tomllib.loads((course / "pyproject.toml").read_text())["project"]["dependencies"]
     assert listed == ["re-course-learn", "six"]
     assert 'name = "six"' in (course / "uv.lock").read_text()
+
+
+def test_bash_course_gets_the_runtime_with_shellcheck(root):
+    course = create("demo", "Demo", "bash", "Summary.", root=root)
+    listed = tomllib.loads((course / "pyproject.toml").read_text())["project"]["dependencies"]
+    assert listed == ["re-course-learn[bash]"]
+    assert 'name = "shellcheck-py"' in (course / "uv.lock").read_text()
 
 
 def test_dependencies_must_be_a_list(root):

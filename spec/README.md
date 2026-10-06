@@ -140,8 +140,10 @@ left_out:                         # optional
 Each course has its own virtual environment, defined by the course's
 `pyproject.toml` and managed by uv. It lists the `learn` runtime
 (`re-course-learn`), the packages from the brief's `dependencies` and the
-Python version. `learn` runs tests, examples and quiz code with that
-environment's interpreter, so course packages are always available.
+Python version. When the runtime has an extra named after the course's
+language, the course uses it: `re-course-learn[bash]` adds ShellCheck. `learn`
+runs tests, examples and quiz code with that environment's interpreter, so
+course packages are always available.
 
 The course's `uv.lock` is committed, so every learner gets the same package
 versions. `.venv/` is not.
@@ -259,4 +261,5 @@ failing test. The runtime keeps no saved state.
 
 `learn check` runs the tests in a temporary copy of the module, without
 `solution/` and `broken/`. It exits with 0 when everything checked passes and
-1 otherwise.
+1 otherwise. When the language has a linter (bash: ShellCheck), it also shows
+the linter's advice on the files it checked; advice never makes a part fail.

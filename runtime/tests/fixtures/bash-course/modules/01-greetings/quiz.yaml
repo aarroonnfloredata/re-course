@@ -1,0 +1,67 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    set -- "a b" c
+    echo "$#"
+  options: ["3", "2", "1"]
+  answer: 1
+  explanation: >-
+    The quotes make "a b" one argument, so there are two. "3" splits it at
+    the space; "1" counts the whole line.
+
+- id: q2
+  objective: 1
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    set -- one two three
+    echo "$2"
+  options: ["two", "one", "three"]
+  answer: 0
+  explanation: >-
+    $1 is the first argument and $2 the second. "one" counts from 0;
+    "three" is the last.
+
+- id: q3
+  objective: 2
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    hello() {
+        echo "hi $1"
+    }
+    hello Ada Grace
+  options: ["hi Ada Grace", "hi", "hi Ada"]
+  answer: 2
+  explanation: >-
+    Inside a function, $1 is the function's first argument, "Ada". Grace is
+    $2, which the function doesn't use.
+
+- id: q4
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "first" > out.txt
+    echo "second" > out.txt
+    cat out.txt
+  options: ["first\nsecond", "second", "first"]
+  answer: 1
+  explanation: >-
+    > empties the file before writing, so only "second" is left. >> would
+    add to the end and keep both lines.
+
+- id: q5
+  objective: 3
+  type: multiple-choice
+  prompt: Which line prints an error message to stderr?
+  options: ['echo "error" >&2', 'echo "error" > 2', 'echo "error" 2>&1']
+  answer: 0
+  explanation: >-
+    >&2 sends output to stderr. > 2 writes to a file called 2, and 2>&1
+    sends stderr to wherever output goes.

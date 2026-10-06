@@ -1,0 +1,10 @@
+id: 01-greetings
+title: Greetings
+exercise_type: implement
+language: bash
+prerequisites: []
+objectives:
+  - "Read a script's arguments with $1 and $#"
+  - "Write functions and call them with arguments"
+  - "Send output to files, and errors to stderr with an exit status"
+sources: [bashref#Positional-Parameters, bashref#Shell-Functions, bashref#Redirections]

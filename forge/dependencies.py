@@ -1,6 +1,9 @@
 """Copy the brief's `dependencies` into the course's pyproject.toml and update
 its uv.lock. Run it whenever the brief's dependencies change.
 
+The runtime comes with the extra named after the course's language, when the
+runtime has one (e.g. re-course-learn[bash] brings ShellCheck).
+
     uv run python -m forge.dependencies <course>
 """
 
@@ -8,11 +11,13 @@ import json
 import re
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 
 import yaml
 
 RUNTIME = "re-course-learn"
+RUNTIME_PYPROJECT = Path(__file__).resolve().parents[1] / "runtime/pyproject.toml"
 MARKER = "# From brief.yaml `dependencies`; rewritten by forge.dependencies."
 BLOCK = re.compile(r"^dependencies = \[\n.*?^\]\n", re.M | re.S)
 
@@ -31,8 +36,9 @@ def sync(course_dir):
         raise DependencyError('brief.yaml: dependencies must be a list of requirements, '
                               'e.g. ["polars>=1.0"]')
 
+    course = yaml.safe_load((course_dir / "course.yaml").read_text(encoding="utf-8")) or {}
     pyproject = course_dir / "pyproject.toml"
-    lines = [f"    {json.dumps(RUNTIME)},\n", f"    {MARKER}\n"]
+    lines = [f"    {json.dumps(runtime_requirement(course.get('language')))},\n", f"    {MARKER}\n"]
     lines += [f"    {json.dumps(item)},\n" for item in wanted]
     text, found = BLOCK.subn("dependencies = [\n" + "".join(lines) + "]\n",
                              pyproject.read_text(encoding="utf-8"), count=1)
@@ -41,6 +47,12 @@ def sync(course_dir):
     pyproject.write_text(text, encoding="utf-8")
     lock(course_dir)
     return wanted
+
+
+def runtime_requirement(language):
+    """re-course-learn, plus the extra for `language` if the runtime has one."""
+    runtime = tomllib.loads(RUNTIME_PYPROJECT.read_text(encoding="utf-8"))["project"]
+    return f"{RUNTIME}[{language}]" if language in runtime.get("optional-dependencies", {}) else RUNTIME
 
 
 def lock(course_dir):

@@ -1,3 +1,4 @@
+import re
 import shutil
 from pathlib import Path
 
@@ -8,19 +9,30 @@ from forge.new_course import create
 
 ROOT = Path(__file__).resolve().parents[2]
 GOLDEN = ROOT / "examples/python/implement-strings"
+BASH_FIXTURE = ROOT / "runtime/tests/fixtures/bash-course"
+
+
+def copy_course(source, tmp_path):
+    """Copy a course. Its runtime path is made absolute, since the copy no
+    longer sits inside re-course."""
+    target = tmp_path / "course"
+    shutil.copytree(source, target, ignore=shutil.ignore_patterns("__pycache__", ".venv", "uv.lock"))
+    pyproject = target / "pyproject.toml"
+    pyproject.write_text(re.sub(r'path = "[^"]*"', f'path = "{ROOT / "runtime"}"',
+                                pyproject.read_text()))
+    return target
 
 
 @pytest.fixture
 def course(tmp_path):
-    """A copy of the golden example. Its runtime path is made absolute, since the
-    copy no longer sits inside re-course."""
-    target = tmp_path / "course"
-    shutil.copytree(GOLDEN, target, ignore=shutil.ignore_patterns("__pycache__", ".venv", "uv.lock"))
-    pyproject = target / "pyproject.toml"
-    pyproject.write_text(
-        pyproject.read_text().replace('"../../../runtime"', f'"{ROOT / "runtime"}"')
-    )
-    return target
+    """A copy of the golden example."""
+    return copy_course(GOLDEN, tmp_path)
+
+
+@pytest.fixture
+def bash_course(tmp_path):
+    """A copy of the runtime's bash fixture course."""
+    return copy_course(BASH_FIXTURE, tmp_path)
 
 
 @pytest.fixture

@@ -8,6 +8,11 @@ dependencies = [
     "pyyaml>=6",
 ]
 
+# One extra per course language that needs more than the above. A course
+# installs re-course-learn[<language>] when its language has one.
+[project.optional-dependencies]
+bash = ["shellcheck-py>=0.10"]
+
 [project.scripts]
 learn = "learn.cli:main"
 

@@ -7,7 +7,7 @@ from pathlib import Path
 
 from . import quiz
 from .course import CourseError, find_root, load_course
-from .stages import tests
+from .stages import lint, tests
 
 MAX_MESSAGES = 5  # distinct failure messages shown per part
 
@@ -92,6 +92,7 @@ def cmd_check(course, args):
             print(f"    ... and {len(messages) - MAX_MESSAGES} more")
         if not tests.all_passed(part_results):
             failing += 1
+    print_advice(module, parts)
 
     if failing:
         print(f"\n{failing} of {len(parts)} still failing.")
@@ -119,6 +120,21 @@ def cmd_quiz(course, args):
         return 1
     print(f"\nScore: {score} of {len(questions)}")
     return 0
+
+
+def print_advice(module, parts):
+    """The linter's advice on the checked files, for languages that have one."""
+    try:
+        advice = lint.run(module, parts)
+    except CourseError as error:
+        advice = [str(error)]
+    if not advice:
+        return
+    print("\nAdvice (doesn't affect passing):")
+    for line in advice[:MAX_MESSAGES]:
+        print(f"    {line}")
+    if len(advice) > MAX_MESSAGES:
+        print(f"    ... and {len(advice) - MAX_MESSAGES} more")
 
 
 def current_module(course):
