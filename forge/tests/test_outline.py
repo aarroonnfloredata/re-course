@@ -1,24 +1,9 @@
 import pytest
 import yaml
-from conftest import edit
+from conftest import edit, module, write_outline
 
 from forge import outline, sources
-from forge.new_course import create
 from forge.validate import validate
-
-OBJECTIVES = ["Do one thing", "Do another thing", "Do a third thing"]
-
-
-def module(module_id, **fields):
-    entry = {"id": module_id, "title": module_id, "exercise_type": "implement",
-             "introduces": [module_id], "objectives": OBJECTIVES, "prerequisites": [],
-             "sources": ["pytutorial#text"], "exercise": "Write a function."}
-    entry.update(fields)
-    return entry
-
-
-def write_outline(course, plan):
-    (course / "outline.yaml").write_text(yaml.safe_dump(plan, sort_keys=False))
 
 
 def problems(course, **options):
@@ -70,19 +55,6 @@ def test_course_yaml_must_match_the_outline(course):
                                   sources=["pystdtypes#str.split"]))
     write_outline(course, plan)
     assert_found(problems(course, execute=False), "course.yaml: modules don't match outline.yaml")
-
-
-@pytest.fixture
-def new_course(root):
-    """A course straight from /new-course, with a brief and one ingested source."""
-    course = create("demo", "Demo", "python", "A demo.", root=root)
-    brief = yaml.safe_load((course / "brief.yaml").read_text())
-    brief["sources"] = [{"id": "notes", "path": "notes.md"}]
-    (course / "brief.yaml").write_text(yaml.safe_dump(brief))
-    (course / "sources/notes.md").write_text(
-        "---\nid: notes\ntitle: Notes\n---\n\n# Notes {#notes}\n\nIntro text.\n\n"
-        "## Loops {#loops}\n\nfor and while.\n")
-    return course
 
 
 def test_approve_writes_the_module_list(new_course):
