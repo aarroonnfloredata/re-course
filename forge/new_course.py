@@ -14,7 +14,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from .dependencies import DependencyError, lock
+from .dependencies import DependencyError, sync
 
 ROOT = Path(__file__).resolve().parents[1]
 NAME = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
@@ -45,7 +45,7 @@ def create(name, title, language, summary, root=ROOT):
                                    "summary": summary})
         (target / "modules").mkdir()
         (target / "sources").mkdir()
-        lock(target)
+        sync(target)  # the runtime with its language extra, then uv.lock
     except (NewCourseError, DependencyError):
         shutil.rmtree(target)
         raise
