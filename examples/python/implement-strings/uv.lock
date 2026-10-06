@@ -133,4 +133,6 @@ dependencies = [
 requires-dist = [
     { name = "pytest", specifier = ">=8" },
     { name = "pyyaml", specifier = ">=6" },
+    { name = "shellcheck-py", marker = "extra == 'bash'", specifier = ">=0.10" },
 ]
+provides-extras = ["bash"]
