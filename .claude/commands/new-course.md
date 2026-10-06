@@ -48,4 +48,4 @@ together with the author. The name comes from `$ARGUMENTS` if given.
 5. **Finish:** show the filled-in brief and confirm no `TODO` is left. The
    next step is `/ingest`.
 
-Don't commit anything in the new workspace's git repo.
+The workspace is a plain folder: never run `git init` in it.
