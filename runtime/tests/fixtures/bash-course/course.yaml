@@ -1,0 +1,5 @@
+title: Bash Fixture
+spec_version: 1
+language: bash
+modules:
+  - 01-greetings

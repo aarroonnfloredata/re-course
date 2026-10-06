@@ -1,0 +1,17 @@
+# The course's own environment, managed by uv. See spec/README.md
+# ("Course environment").
+[project]
+name = "bash-course"
+version = "0.1.0"
+description = "Bash Fixture: a one-module bash course for testing"
+requires-python = ">=3.12"
+dependencies = [
+    "re-course-learn[bash]",
+]
+
+[tool.uv]
+package = false  # the course is not a Python package; uv only manages its environment
+
+[tool.uv.sources]
+# The fixture sits three folders below runtime/.
+re-course-learn = { path = "../../..", editable = true }
