@@ -2,7 +2,7 @@ import pytest
 import yaml
 from conftest import edit
 
-from forge import outline
+from forge import outline, sources
 from forge.new_course import create
 from forge.validate import validate
 
@@ -110,15 +110,24 @@ def test_approve_refuses_an_outline_with_problems(new_course):
     assert yaml.safe_load((new_course / "course.yaml").read_text())["modules"] == []
 
 
-def test_sections_and_show(new_course, capsys):
+def test_sources_list_and_show(new_course, capsys):
+    assert sources.main(["list", str(new_course)]) == 0
+    out = capsys.readouterr().out
+    assert "notes (" in out
+    assert "#loops  Loops  (3 words)" in out
+    # A section runs until the next heading of the same or a higher level.
+    assert sources.show_section(new_course, "notes#notes") == (
+        "# Notes {#notes}\n\nIntro text.\n\n## Loops {#loops}\n\nfor and while.\n")
+    assert sources.show_section(new_course, "notes#loops") == "## Loops {#loops}\n\nfor and while.\n"
+    with pytest.raises(sources.SourceError, match="no section"):
+        sources.show_section(new_course, "notes#nope")
+
+
+def test_show(new_course, capsys):
     write_outline(new_course, {
         "modules": [module("01-basics", sources=["notes#notes"])],
         "left_out": [{"section": "notes#loops", "reason": "Later."}],
     })
-    assert outline.main(["sections", str(new_course)]) == 0
-    out = capsys.readouterr().out
-    assert "notes (" in out
-    assert "#loops  Loops  (3 words)" in out
     assert outline.main(["show", str(new_course)]) == 0
     out = capsys.readouterr().out
     assert "01-basics  01-basics" in out
