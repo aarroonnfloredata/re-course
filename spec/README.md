@@ -74,7 +74,7 @@ goals:
 sources:
   - id: pytutorial          # source ID used in citations
     url: https://docs.python.org/3/tutorial/introduction.html
-project_style: independent  # or: cumulative
+project_style: independent  # or: cumulative (the template's default)
 dependencies: []            # packages the course needs, e.g. ["polars>=1.0"]
 constraints: ["standard library only"]
 ```
