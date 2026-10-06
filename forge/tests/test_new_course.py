@@ -13,8 +13,9 @@ def test_create(root):
     course = create("demo", 'Python "Gotchas"', "python", "A short course.", root=root)
     assert course == root / "workspace/demo"
     for name in ["README.md", "pyproject.toml", "brief.yaml", "course.yaml", ".gitignore",
-                 "uv.lock", ".git", "modules", "sources"]:
+                 "uv.lock", "modules", "sources"]:
         assert (course / name).exists(), name
+    assert not (course / ".git").exists()  # nothing inside re-course is its own repository
     for path in course.glob("*.*"):
         if path.is_file():
             assert "{{" not in path.read_text(), path.name
