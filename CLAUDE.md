@@ -49,6 +49,8 @@ which is plain Python with no AI.
 ## Commands
 
 - Setup check: `python3 forge/doctor.py`
+- New course: `/new-course <name>`
+- After changing a brief's `dependencies`: `uv run python -m forge.dependencies <course folder>`
 - Validate a course: `uv run python -m forge.validate <course folder> [module ...]`
   (`--static` skips the checks that run code)
 - Generator tests: `uv run pytest`
