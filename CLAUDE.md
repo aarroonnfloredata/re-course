@@ -51,6 +51,7 @@ which is plain Python with no AI.
 - Setup check: `python3 forge/doctor.py`
 - New course: `/new-course <name>`
 - Ingest sources: `/ingest <name>` (runs `uv run python -m forge.ingest <course folder>`)
+- Plan modules: `/outline <name>` (uses `uv run python -m forge.outline sections|show|approve <course folder>`)
 - After changing a brief's `dependencies`: `uv run python -m forge.dependencies <course folder>`
 - Validate a course: `uv run python -m forge.validate <course folder> [module ...]`
   (`--static` skips the checks that run code)
