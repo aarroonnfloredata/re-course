@@ -18,7 +18,7 @@ with the author, not around them.
 2. **Read the sources' structure first:**
 
    ```
-   uv run python -m forge.outline sections workspace/<course>
+   uv run python -m forge.sources list workspace/<course>
    ```
 
    Then read only the sections that matter for the goals. Large sources don't
