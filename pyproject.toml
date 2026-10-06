@@ -1,0 +1,28 @@
+# The generator's own environment (forge/). Courses have their own; see
+# spec/README.md ("Course environment").
+[project]
+name = "re-course"
+version = "0.1.0"
+description = "Generates hands-on, test-graded courses from technical sources."
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.12",
+    "certifi",  # trusted certificates for downloads; some Pythons ship without them
+    "jsonschema>=4",
+    "markdownify>=0.13",
+    "pdfplumber>=0.11",
+    "pyyaml>=6",
+]
+
+[dependency-groups]
+dev = [
+    "fpdf2>=2.7",  # builds small PDFs for the ingest tests
+    "pytest>=8",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["forge/tests"]
+pythonpath = ["."]

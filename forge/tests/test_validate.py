@@ -1,0 +1,95 @@
+import shutil
+
+from conftest import edit
+
+from forge.validate import validate
+from forge.validate.__main__ import main
+
+MODULE = "modules/01-strings"
+
+
+def assert_found(problems, *expected):
+    for text in expected:
+        assert any(text in problem for problem in problems), f"no problem mentions {text!r}:\n" + "\n".join(problems)
+
+
+def test_golden_example_passes(course):
+    assert validate(course).problems == []
+
+
+def test_static_problems(course):
+    module = course / MODULE
+    edit(module / "module.yaml", "id: 01-strings", "id: 01-text")
+    edit(module / "lesson.md", "index 0. ([pytutorial#text])", "index 0. ([pytutorial#numbers])")
+    edit(module / "lesson.md", "1. Get single characters", "1. Get characters")
+    edit(module / "lesson.md", "read [`recap.md`](recap.md)", "read `recap.md`")
+    edit(module / "lesson.md", "```output\nR2D2\n```\n", "")
+    (module / "challenges/c3.py").unlink()
+    edit(module / "quiz.yaml", 'options: ["i", "r", "a"]\n  answer: 1', 'options: ["i", "r", "a"]\n  answer: 3')
+    edit(module / "recap.md", "is an error. (objective 1)", "is an error.")
+    variant = module / "broken/slugify-keeps-case/exercise/text_tools.py"
+    edit(variant, "# Broken variant: ", "# ")
+
+    problems = validate(course, execute=False).problems
+    assert_found(
+        problems,
+        "id '01-text' doesn't match the folder name",
+        "pytutorial#numbers is cited but not defined",
+        "don't match module.yaml sources",
+        "has no section {#numbers}",
+        "the objectives list doesn't match module.yaml",
+        "mentions recap.md without linking it",
+        "\"What's next\" doesn't link recap.md",
+        "must be followed directly by an output block",
+        "challenges/c3.*: missing for challenge c3",
+        "solution/challenges/c3.py: there is no learner file",
+        "q1: answer 3 is not an option",
+        "point doesn't end with (objective N)",
+        "no point for objective 1",
+        "slugify-keeps-case/exercise/text_tools.py: the first line must be",
+    )
+
+
+def test_schema_problem(course):
+    edit(course / MODULE / "quiz.yaml", 'options: ["ari", "Par", "ar"]', "options: [1, 2, 3]")
+    assert_found(validate(course, execute=False).problems, "1 is not of type 'string'")
+
+
+def test_problems_found_by_running_code(course):
+    module = course / MODULE
+    edit(module / "lesson.md", "```output\nJython\nPython\nhahaha\n```", "```output\nJython\nPython\nhaha\n```")
+    edit(module / "quiz.yaml", 'options: ["HELLO", "hello", "Hello"]\n  answer: 1',
+         'options: ["HELLO", "hello", "Hello"]\n  answer: 0')
+    edit(module / "tests/test_exercise.py",
+         '@pytest.mark.objective(2)\n@pytest.mark.parametrize("text"', '@pytest.mark.parametrize("text"')
+    with open(module / "tests/test_challenges.py", "a") as tests:
+        tests.write("\n\n@pytest.mark.objective(1)\ndef test_c1_always_passes():\n    pass\n")
+    solution = (module / "solution/exercise/text_tools.py").read_text()
+    (module / "broken/slugify-keeps-case/exercise/text_tools.py").write_text(
+        "# Broken variant: identical to the solution\n" + solution)
+    shutil.rmtree(module / "broken/mask-keeps-first-characters")
+
+    problems = validate(course).problems
+    assert_found(
+        problems,
+        "but the output block says 'Jython\\nPython\\nhaha\\n'",
+        "q4: the code prints 'hello', but the marked answer is 'HELLO'",
+        "test_exercise::test_mask_short_text_unchanged: declares no objective",
+        "starter: test_challenges::test_c1_always_passes passes, so it checks nothing",
+        "broken/slugify-keeps-case: no exercise test catches it",
+        "broken/slugify-keeps-case/exercise/text_tools.py: changes no function",
+        "mask() has no broken variant",
+    )
+
+
+def test_cli(course, capsys):
+    assert main([str(course), "--static"]) == 0
+    assert "No problems found." in capsys.readouterr().out
+    edit(course / MODULE / "recap.md", "(objective 4)", "(objective 9)")
+    assert main([str(course), "01", "--static"]) == 1
+    assert "objective 9 doesn't exist" in capsys.readouterr().out
+
+
+def test_cli_without_a_course(tmp_path, capsys):
+    assert main([str(tmp_path)]) == 2
+    assert "no course.yaml" in capsys.readouterr().err

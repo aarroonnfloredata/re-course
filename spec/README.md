@@ -39,8 +39,10 @@ together.
 ├── course.yaml          # course metadata, read by the runtime
 ├── pyproject.toml       # the course's environment; see "Course environment"
 ├── brief.yaml           # workspace only: the hand-written course brief
+├── outline.yaml         # workspace only: the module plan
 ├── sources/             # workspace only: ingested sources
-│   └── <source-id>.md
+│   ├── <source-id>.md
+│   └── raw/             # downloaded originals, reused by ingest
 └── modules/
     └── <module-id>/     # see "Module layout"
 ```
@@ -74,16 +76,64 @@ goals:
 sources:
   - id: pytutorial          # source ID used in citations
     url: https://docs.python.org/3/tutorial/introduction.html
-project_style: independent  # or: cumulative
+    license: "PSF License Version 2"   # optional
+    selector: "div.body"               # optional; HTML pages only
+project_style: independent  # or: cumulative (the template's default)
 dependencies: []            # packages the course needs, e.g. ["polars>=1.0"]
 constraints: ["standard library only"]
 ```
 
 Each source has an `id` (lowercase letters, digits, hyphens) and either a
-`url` or a `path` to a local file, relative to the workspace.
+`url` or a `path` to a local file, relative to the workspace. One source is
+one page or one file; a site with many pages is listed as several sources.
+
+Optional per source:
+
+- `license`: what the source allows. Copied into the ingested file; without
+  it, ingest writes "unknown: check before publishing".
+- `selector`: a CSS selector for the page's main content, for when ingest's
+  automatic choice picks up menus or footers.
 
 `dependencies` is copied into the course's `pyproject.toml`, which defines the
 course's own environment (see "Course environment").
+
+## `outline.yaml`
+
+The module plan, written by `/outline` from the brief and the sources, and
+approved by the course author before any module is built.
+
+```yaml
+scenario: >-                      # cumulative courses only
+  A log analyzer for a small web server, growing module by module.
+modules:
+  - id: 01-pipes-and-redirection
+    title: Pipes and Redirection
+    exercise_type: implement
+    introduces: [pipes, output redirection, stderr]
+    objectives:                   # 3–5
+      - "Connect commands with |"
+      - "Send output and errors to files"
+      - "Keep errors apart from normal output"
+    prerequisites: []
+    sources: [tlcl#6.1, tlcl#6.2]
+    exercise: >-
+      Count the error lines in access.log and save them to errors.txt.
+left_out:                         # optional
+  - section: tlcl#6.5
+    reason: "tee: not needed for the goals"
+```
+
+- Modules are in learning order and numbered by position (`01-`, `02-`, …).
+- `prerequisites` are earlier modules only.
+- `introduces` lists the concepts a module teaches first; each concept is
+  introduced by one module only.
+- Every cited section, in `sources` and `left_out`, exists in `sources/`. A
+  section is either used or left out, not both.
+- A cumulative course has a `scenario`, and each module's `exercise` says
+  what it adds to it.
+- Approving the outline (`uv run python -m forge.outline approve <course>`)
+  writes the module IDs into `course.yaml`. `/build-module` creates each
+  `module.yaml` from its outline entry.
 
 ## Course environment
 
@@ -126,15 +176,19 @@ title: "Strings: Indexing, Slicing and Methods"
 exercise_type: implement
 language: python
 prerequisites: []                 # module IDs
-objectives:
+objectives:                       # 3–5
   - "Get single characters from a string with positive and negative indexes"
   - "Take substrings with slices, including omitted and out-of-range bounds"
+  - "Build new strings instead of changing existing ones, and keep the results of string methods"
 sources: [pytutorial#text, pystdtypes#string-methods]
 checkpoint: checkpoints/03/       # optional; cumulative courses only
 ```
 
 - `exercise_type` names the file in `exercise-types/` that applies.
+- A module has 3–5 objectives.
 - `sources` lists exactly the citation IDs the lesson uses.
+- `id`, `title`, `exercise_type`, `prerequisites`, `objectives` and `sources`
+  match the module's entry in `outline.yaml`.
 - `checkpoint` is not yet specified; see `exercises.md`.
 
 ## Objectives
@@ -149,19 +203,17 @@ to them by number:
 
 ## Sources
 
-The ingest step writes one Markdown file per source, `sources/<source-id>.md`:
+Ingest (`uv run python -m forge.ingest <course>`) writes one Markdown file per
+source, `sources/<source-id>.md`, and keeps downloaded originals in
+`sources/raw/`. Supported: HTML pages, PDFs, and local Markdown or text files.
 
 ```markdown
 ---
 id: pytutorial
-title: "The Python Tutorial: 3. An Informal Introduction to Python"
-url: https://docs.python.org/3/tutorial/introduction.html
-version: "3.14"
-retrieved: 2026-10-04
-license: >-
-  © Copyright 2001 Python Software Foundation. Licensed under the Python
-  Software Foundation License Version 2.
-excerpt: "Section 3.1.2 only"   # optional; present when not the whole source
+title: 3. An Informal Introduction to Python — Python 3.14.8 documentation
+url: https://docs.python.org/3/tutorial/introduction.html   # or: path
+retrieved: 2026-10-06
+license: PSF License Version 2
 ---
 
 ## 3.1.2. Text {#text}
@@ -169,14 +221,26 @@ excerpt: "Section 3.1.2 only"   # optional; present when not the whole source
 ...
 ```
 
+- Ingest writes `id`, `title`, `url` or `path`, `retrieved` and `license`.
+  A hand-made file may add `version`, and `excerpt` when it holds only part
+  of the source; omitted text is then marked `[…]`.
 - Every section that can be cited has a heading ending in `{#<section-id>}`.
 - A section includes everything up to the next heading of the same or higher
   level.
-- Omitted text inside an excerpt is marked `[…]`.
+- Ingest rewrites the file on every run. Fix problems through the brief
+  (e.g. a `selector`), not by editing the file.
 
-**Citation IDs** are `<source-id>#<section-id>`. The section ID is the
-source's own anchor or section number where it has one (`pytutorial#text`
-matches `introduction.html#text`), otherwise a slug of the heading.
+**Citation IDs** are `<source-id>#<section-id>`. Ingest takes the section ID
+from the source itself, so it stays the same between runs:
+
+- **HTML:** the heading's anchor: its own `id`, an anchor inside it, the `id`
+  of the section that wraps it, or an empty anchor just before it
+  (`pytutorial#text` matches `introduction.html#text`).
+- **PDF:** the PDF's table of contents. The ID is the section number when the
+  title starts with one (`7.3`); without a table of contents, each page is a
+  section (`page-12`).
+- **Markdown:** an existing `{#id}`.
+- Otherwise a slug of the heading. Duplicates get `-2`, `-3`, ….
 
 ## Runtime commands
 

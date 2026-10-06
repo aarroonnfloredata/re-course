@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "outline.yaml",
+  "description": "A course's module plan, written by /outline. See spec/README.md. Checked by the validator, not by this schema: module numbers in order, prerequisites are earlier modules, cited sections exist, a concept is introduced once, a cumulative course has a scenario.",
+  "type": "object",
+  "required": ["modules"],
+  "additionalProperties": false,
+  "properties": {
+    "scenario": {
+      "description": "Cumulative courses: the scenario every module's exercise extends.",
+      "type": "string",
+      "minLength": 1
+    },
+    "modules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/module"
+      }
+    },
+    "left_out": {
+      "description": "Source sections deliberately not used, with the reason.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["section", "reason"],
+        "additionalProperties": false,
+        "properties": {
+          "section": {
+            "$ref": "#/$defs/citationId"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "module": {
+      "type": "object",
+      "required": [
+        "id",
+        "title",
+        "exercise_type",
+        "introduces",
+        "objectives",
+        "prerequisites",
+        "sources",
+        "exercise"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/moduleId"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "exercise_type": {
+          "enum": ["implement"]
+        },
+        "introduces": {
+          "description": "Concepts this module teaches for the first time.",
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "objectives": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "prerequisites": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/moduleId"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/citationId"
+          }
+        },
+        "exercise": {
+          "description": "What the exercise asks for; for a cumulative course, what it adds to the scenario.",
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "moduleId": {
+      "type": "string",
+      "pattern": "^[0-9]{2}-[a-z0-9]+(-[a-z0-9]+)*$"
+    },
+    "citationId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*#[A-Za-z0-9._-]+$"
+    }
+  }
+}

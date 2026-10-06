@@ -7,7 +7,7 @@ description = "{{title}}: a re-course course"
 requires-python = ">=3.12"
 dependencies = [
     "re-course-learn",
-    # The brief's `dependencies` go here.
+    # From brief.yaml `dependencies`; rewritten by forge.dependencies.
 ]
 
 [tool.uv]
