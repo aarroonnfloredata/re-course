@@ -20,9 +20,9 @@ which is plain Python with no AI.
 - `forge/`: deterministic generator helpers (ingest, validate)
 - `templates/course/`: copied into every new course
 - `examples/`: golden examples, one per exercise type
-- `workspace/<course>/`: courses being generated; gitignored, each its own
-  private git repo
-- `shared-workspace/<course>/`: published courses, written only by `/publish`
+- `workspace/<course>/`: courses being generated; gitignored and private
+- `shared-workspace/<course>/`: published courses, committed to `re-course`,
+  written only by `/publish`
 
 ## Quality bar
 
@@ -52,6 +52,9 @@ which is plain Python with no AI.
 - New course: `/new-course <name>`
 - Ingest sources: `/ingest <name>` (runs `uv run python -m forge.ingest <course folder>`)
 - Plan modules: `/outline <name>` (uses `uv run python -m forge.outline show|approve <course folder>`)
+- Build a module: `/build-module <name> <module>` (uses `uv run python -m forge.build init ...`)
+- Take a course as a learner: `uv run python -m forge.trial <course folder>`, then
+  `cd <course folder>-trial && uv run learn next`
 - Read sources by section: `uv run python -m forge.sources list <course folder>`,
   `uv run python -m forge.sources show <course folder> <source-id#section-id>`
 - After changing a brief's `dependencies`: `uv run python -m forge.dependencies <course folder>`

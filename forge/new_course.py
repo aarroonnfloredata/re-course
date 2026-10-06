@@ -2,15 +2,15 @@
 
     uv run python -m forge.new_course <name> --title "..." --language python --summary "..."
 
-Fills in the template's placeholders, runs `git init` in the new folder (only
-there; nothing is committed) and creates its uv.lock. The author fills in the
+Fills in the template's placeholders and creates the course's uv.lock. The
+workspace stays a plain folder: re-course gitignores workspace/, and nothing
+inside re-course is a git repository of its own. The author fills in the
 brief afterwards; see .claude/commands/new-course.md.
 """
 
 import argparse
 import re
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 
@@ -45,7 +45,6 @@ def create(name, title, language, summary, root=ROOT):
                                    "summary": summary})
         (target / "modules").mkdir()
         (target / "sources").mkdir()
-        git_init(target)
         lock(target)
     except (NewCourseError, DependencyError):
         shutil.rmtree(target)
@@ -64,15 +63,6 @@ def fill_placeholders(folder, values):
                 value = value.replace("\\", "\\\\").replace('"', '\\"')
             text = text.replace("{{" + key + "}}", value)
         path.write_text(text, encoding="utf-8")
-
-
-def git_init(folder):
-    try:
-        process = subprocess.run(["git", "init", "-q"], cwd=folder, capture_output=True, text=True)
-    except FileNotFoundError:
-        raise NewCourseError("git is not installed: https://git-scm.com/downloads") from None
-    if process.returncode != 0:
-        raise NewCourseError(f"git init failed: {process.stderr.strip()}")
 
 
 def main(argv=None):
