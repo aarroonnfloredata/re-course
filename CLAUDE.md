@@ -48,5 +48,8 @@ which is plain Python with no AI.
 
 ## Commands
 
+- Validate a course: `uv run python -m forge.validate <course folder> [module ...]`
+  (`--static` skips the checks that run code)
+- Generator tests: `uv run pytest`
 - Runtime tests: `cd runtime && uv run --no-project --with-editable . --with pytest pytest`
 - Try a course: `cd <course folder> && uv run learn next`
