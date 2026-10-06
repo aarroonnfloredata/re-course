@@ -78,7 +78,23 @@ def test_problems_found_by_running_code(course):
         "starter: test_challenges::test_c1_always_passes passes, so it checks nothing",
         "broken/slugify-keeps-case: no exercise test catches it",
         "broken/slugify-keeps-case/exercise/text_tools.py: changes no function",
-        "mask() has no broken variant",
+        "no broken variant changes mask",
+    )
+
+
+def test_bash_fixture_passes(bash_course):
+    assert validate(bash_course).problems == []
+
+
+def test_bash_problems(bash_course):
+    module = bash_course / "modules/01-greetings"
+    edit(module / "solution/exercise/text.sh", 'echo "$1!"', "echo $1!")
+    edit(bash_course / "pyproject.toml", '"re-course-learn[bash]"', '"re-course-learn"')
+    problems = validate(bash_course).problems
+    assert_found(
+        problems,
+        "pyproject.toml: dependencies must include re-course-learn[bash]",
+        "solution/exercise/text.sh:12: Double quote to prevent globbing",
     )
 
 
