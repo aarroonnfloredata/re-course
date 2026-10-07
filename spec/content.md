@@ -16,7 +16,9 @@ In this order:
 3. "By the end of this module you can:" followed by the objectives as a
    numbered list: same objectives, same order as `module.yaml`. Wording may
    only add code formatting.
-4. A short "How to work through it" paragraph.
+4. A short "How to work through it" paragraph. It doesn't repeat what the
+   course `README.md` already tells the learner: where to run examples and
+   the starter stubs.
 5. One `##` section per topic, with `###` subsections where needed.
    Challenges sit in the section they practise.
 6. `## What's next`, linking the exercise files and `recap.md` and naming

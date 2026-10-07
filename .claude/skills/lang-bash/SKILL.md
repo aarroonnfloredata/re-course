@@ -61,6 +61,11 @@ versions have, and only output both versions print the same way:
 - `awk`: macOS has the original awk. Use only POSIX features (no `gensub`,
   `asort`, ...).
 
+**Before the first exercise.** Make sure the course tells the learner to
+run examples in bash (their terminal may start another shell, such as zsh
+on macOS), and what exit status 0 means: starter files state exit statuses
+from the first module on.
+
 ## Starter files
 
 Every `.sh` file starts with `#!/usr/bin/env bash`. Learners and tests run
