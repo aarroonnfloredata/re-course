@@ -172,6 +172,6 @@ A list of 5–7 questions:
 ```
 
 - `# Recap: <short title>` followed by a bullet list.
-- At most 7 points and 150 words.
+- At most 150 words.
 - Each point ends with `(objective N)`; every objective appears at least once.
 - No material the lesson didn't cover.
