@@ -25,6 +25,8 @@ For every factual claim in the prose (not the code examples):
 - **Uncited:** is it shown by a runnable example in the same section, which
   the spec allows? If not, it needs a citation; name the section that would
   support it, if one does.
+- **Comparison with the learner's language** (from the brief's `learner`):
+  it needs no citation, but check it is correct and report it if it isn't.
 
 Also flag quiz explanations and recap points that contradict the sources.
 Check only facts: style, teaching and code are someone else's job.

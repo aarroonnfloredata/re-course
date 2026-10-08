@@ -43,7 +43,8 @@ you the course folder (`workspace/<course>/`) and the module ID; its
   `introduces` list or earlier modules.
 - Every factual claim cites a section you have read. Never cite from memory.
   If the sources don't support something the objectives need, say so in your
-  report instead of writing it uncited.
+  report instead of writing it uncited. Short comparisons with the learner's
+  language are the exception (`spec/content.md`, "Citations").
 - Run every example and every `predict-output` snippet the way the
   validator does (the language skill says how) and copy the real output.
 - Don't write tests, solutions or broken variants. Other agents write those

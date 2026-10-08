@@ -87,6 +87,9 @@ The first character has index 0. ([pytutorial#text])
   IDs equals `sources` in `module.yaml`.
 - A claim may go uncited only when a runnable example in the same section
   shows it.
+- A short comparison with a language the brief's `learner` already knows
+  (`$1` is Python's `sys.argv[1]`) may go uncited. It must be correct, and
+  the rest of the sentence still needs its citation or example.
 
 The fact-checker compares each cited claim with the cited section.
 
