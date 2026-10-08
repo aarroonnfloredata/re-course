@@ -4,13 +4,18 @@ learner without changing the workspace's starter files.
     uv run python -m forge.trial <course> [--fresh]
 
 The copy goes next to the course (`workspace/<course>-trial/`), so it stays
-gitignored and finds the runtime the same way. /publish removes it.
+gitignored and finds the runtime the same way. /publish removes it. Its
+course.yaml lists only the modules built so far.
 """
 
 import argparse
 import shutil
 import sys
 from pathlib import Path
+
+import yaml
+
+from .outline import write_modules
 
 # What a learner gets; everything else (brief, outline, sources) is authoring only.
 LEARNER_FILES = ["course.yaml", "pyproject.toml", "uv.lock", "README.md", ".gitignore",
@@ -40,6 +45,16 @@ def copy_learner_files(course_dir, target):
             shutil.copy2(source, target / name)
 
 
+def split_modules(course_dir):
+    """The module IDs in course.yaml: those built (with a module.yaml), and
+    those not built yet."""
+    course_dir = Path(course_dir)
+    data = yaml.safe_load((course_dir / "course.yaml").read_text(encoding="utf-8")) or {}
+    module_ids = data.get("modules") or []
+    built = [m for m in module_ids if (course_dir / "modules" / m / "module.yaml").is_file()]
+    return built, [m for m in module_ids if m not in built]
+
+
 def create(course_dir, fresh=False):
     course_dir = Path(course_dir)
     if not (course_dir / "course.yaml").is_file():
@@ -51,6 +66,9 @@ def create(course_dir, fresh=False):
                              "(your work there will be lost)")
         shutil.rmtree(target)
     copy_learner_files(course_dir, target)
+    built, unbuilt = split_modules(course_dir)
+    if unbuilt:  # learn stops at a listed module that doesn't exist
+        write_modules(target / "course.yaml", built)
     return target
 
 
@@ -74,6 +92,9 @@ def main(argv=None):
     except TrialError as error:
         print(f"forge.trial: {error}", file=sys.stderr)
         return 1
+    _, unbuilt = split_modules(args.course)
+    if unbuilt:
+        print(f"Left out the modules not built yet: {', '.join(unbuilt)}")
     print(f"Created {target}/. Take the course there:\n\n    cd {target} && uv run learn next")
     return 0
 
