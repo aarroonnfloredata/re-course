@@ -1,3 +1,4 @@
+import importlib.util
 import shutil
 
 import pytest
@@ -82,6 +83,26 @@ def test_missing_function_and_wrong_status(module):
         "`bash exercise/greet.sh` should exit with status 2, but exited with 0.\n"
         "Hint: $# is the number of arguments; exit sets the status.",
     }
+
+
+@pytest.mark.parametrize(
+    "expected, printed, message",
+    [
+        ("", "oops\n",
+         "`bash greet.sh Ada` should print nothing to stderr, but printed:\n    oops"),
+        ("usage: greet.sh NAME", "",
+         "`bash greet.sh Ada` should print to stderr:\n    usage: greet.sh NAME\n"
+         "but printed nothing."),
+    ],
+)
+def test_stderr_messages(expected, printed, message):
+    spec = importlib.util.spec_from_file_location("helpers", BASH_MODULE / "tests/helpers.py")
+    helpers = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helpers)
+    run = helpers.Run("bash greet.sh Ada", "", "Hello, Ada!\n", printed, 0)
+    with pytest.raises(pytest.fail.Exception) as failure:
+        helpers.check(run, stdout="Hello, Ada!", stderr=expected)
+    assert str(failure.value) == message
 
 
 def test_stubs():
