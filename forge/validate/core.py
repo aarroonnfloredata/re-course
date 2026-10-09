@@ -22,7 +22,7 @@ SPEC = Path(__file__).resolve().parents[2] / "spec"
 MODULE_FILES = ["module.yaml", "lesson.md", "challenges", "exercise", "tests",
                 "quiz.yaml", "recap.md", "solution", "broken"]
 LESSON_WORDS = (500, 1200)
-CHALLENGE_COUNT = (2, 3)
+CHALLENGE_COUNT = (2, 4)
 RECAP_WORDS = 150
 
 SOURCE_ID = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")

@@ -101,7 +101,7 @@ Every file the lesson mentions is a relative link from `lesson.md`:
 ## Challenges
 
 A challenge is a short task in the middle of the lesson, completable in a few
-minutes. A module has 2–3.
+minutes. A module has 2–4.
 
 In the lesson, a challenge is an HTML comment followed directly by a
 blockquote:

@@ -29,7 +29,7 @@ with the author, not around them.
      the goals don't need, and list notable omissions in `left_out` with a
      reason.
    - Group the concepts into modules. A module has 3–5 objectives and must fit
-     a lesson of 500–1,200 words, 2–3 challenges and a 5–7 question quiz.
+     a lesson of 500–1,200 words, 2–4 challenges and a 5–7 question quiz.
    - Order the modules so nothing is used before it is taught. Each concept
      appears in the `introduces` of one module only.
    - Cite for each module the source sections its lesson will draw on.
