@@ -137,4 +137,14 @@ def lines(text):
 
 
 def indent(text):
-    return "\n".join(f"    {line}" for line in lines(text))
+    return "\n".join(f"    {show(line)}" for line in lines(text))
+
+
+def show(line):
+    """A line as a message shows it: an empty or blank line gets a label, so
+    it can be seen."""
+    if not line:
+        return "(empty line)"
+    if not line.strip():
+        return f'(blank line: "{line}")'
+    return line

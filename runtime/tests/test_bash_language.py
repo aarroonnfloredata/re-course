@@ -105,6 +105,27 @@ def test_stderr_messages(expected, printed, message):
     assert str(failure.value) == message
 
 
+@pytest.mark.parametrize(
+    "printed, message",
+    [
+        ("\n", "`bash greet.sh Ada` should print:\n    Hello, Ada!\nbut printed:\n"
+               "    (empty line)"),
+        ("  \n", "`bash greet.sh Ada` should print:\n    Hello, Ada!\nbut printed:\n"
+                 '    (blank line: "  ")'),
+        ("Hello,\n\nAda!\n", "`bash greet.sh Ada` should print:\n    Hello, Ada!\n"
+                             "but printed:\n    Hello,\n    (empty line)\n    Ada!"),
+    ],
+)
+def test_blank_lines_are_shown(printed, message):
+    spec = importlib.util.spec_from_file_location("helpers", BASH_MODULE / "tests/helpers.py")
+    helpers = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(helpers)
+    run = helpers.Run("bash greet.sh Ada", "", printed, "", 0)
+    with pytest.raises(pytest.fail.Exception) as failure:
+        helpers.check(run, stdout="Hello, Ada!")
+    assert str(failure.value) == message
+
+
 def test_stubs():
     assert bash.stubs(BASH_MODULE / "exercise/greet.sh") == ["greet.sh"]
     assert bash.stubs(BASH_MODULE / "exercise/text.sh") == ["shout", "count_lines"]
