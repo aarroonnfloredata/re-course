@@ -81,6 +81,14 @@ Then, for a course called `bash-basics`:
    uv run learn next
    ```
 
+   Do this if you want to trial a course or module that you intend to publish
+   for others. `--fresh` replaces an earlier trial copy, answers included;
+   `/publish` removes it.
+
+   If you write a course only for yourself, you do not have to create a trial
+   copy of it. You can work directly with the original course files (e.g.
+   `workspace/bash-basics`) as these would not get published and shared.
+
 6. **`/publish bash-basics`** copies the course's learner files into
    `shared-workspace/bash-basics/`, ready to commit and share.
 
