@@ -22,12 +22,18 @@ HEADINGS = ["h1", "h2", "h3", "h4", "h5", "h6"]
 TOKEN = "ZZANCHOR{}ZZ"
 
 
-def convert(html, base_url=None, selector=None):
+def convert(html, base_url=None, selector=None, exclude=()):
     # html5lib parses like a browser: it closes the <p> tags wikis leave open,
     # where html.parser nests them hundreds deep.
     soup = BeautifulSoup(html, "html5lib")
     title = page_title(soup)
     main, warnings = main_content(soup, selector)
+    for pattern in exclude:
+        found = main.select(pattern)
+        if not found:
+            warnings.append(f"exclude {pattern!r} matches nothing on the page")
+        for element in found:
+            element.decompose()
     for pattern in REMOVE:
         for element in main.select(pattern):
             element.decompose()

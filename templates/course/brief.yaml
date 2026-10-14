@@ -21,6 +21,7 @@ sources:
     # license: "..."  # optional: what the source allows; checked before publishing
     # restricted: true  # optional: the licence limits sharing material built from it
     # selector: "..."  # optional, HTML only: CSS selector for the main content
+    # exclude: ["..."]  # optional, HTML only: CSS selectors for parts of it to drop
 
 project_style: cumulative  # or: independent (see spec/exercises.md)
 dependencies: []  # packages the course needs, e.g. ["polars>=1.0"]
