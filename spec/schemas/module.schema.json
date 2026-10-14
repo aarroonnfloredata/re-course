@@ -23,7 +23,7 @@
     },
     "exercise_type": {
       "description": "Names the file in spec/exercise-types/ that applies.",
-      "enum": ["implement"]
+      "enum": ["implement", "refactor"]
     },
     "language": {
       "type": "string",

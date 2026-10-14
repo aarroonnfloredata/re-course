@@ -8,14 +8,15 @@ them must agree on is here. Teaching advice and language specifics are not;
 they live in skills and agent prompts.
 
 The reference implementation of this spec is the golden example
-`examples/python/implement-strings/`.
+`examples/python/implement-strings/`; `examples/python/refactor-long-method/`
+is the reference for `refactor` modules.
 
 | File | Contents | Read by |
 |---|---|---|
 | `README.md` | terms, layouts, `course.yaml`, `brief.yaml`, `module.yaml`, sources, objectives, runtime commands | everyone |
 | `content.md` | lesson, runnable examples, citations, challenges, quiz, recap | lesson-writer, fact-checker, reviewer |
-| `exercises.md` | starter files, tests, failure messages, solutions, broken variants | test-author, solution-author |
-| `exercise-types/<type>.md` | validation rules for one exercise type | test-author, solution-author, validator |
+| `exercises.md` | starter files, tests, failure messages, solutions, broken variants | test-author, solution-author, smell-author |
+| `exercise-types/<type>.md` | validation rules for one exercise type | test-author, solution-author, smell-author, validator |
 | `schemas/*.json` | machine-checkable structure | validator, runtime |
 
 Markdown is the source of truth for intent, schemas for structure. Change both
