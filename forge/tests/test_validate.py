@@ -29,6 +29,8 @@ def test_static_problems(course):
     edit(module / "recap.md", "is an error. (objective 1)", "is an error.")
     variant = module / "broken/slugify-keeps-case/exercise/text_tools.py"
     edit(variant, "# Broken variant: ", "# ")
+    edit(course / "brief.yaml", "    url: https://docs.python.org/3/library/stdtypes.html",
+         "    url: https://docs.python.org/3/library/stdtypes.html\n    restricted: sometimes")
 
     problems = validate(course, execute=False).problems
     assert_found(
@@ -47,6 +49,7 @@ def test_static_problems(course):
         "point doesn't end with (objective N)",
         "no point for objective 1",
         "slugify-keeps-case/exercise/text_tools.py: the first line must be",
+        "sources/1: restricted must be true or false",
     )
 
 

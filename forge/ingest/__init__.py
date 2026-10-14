@@ -86,6 +86,8 @@ def ingest_source(course_dir, source, report, refresh, today):
 
     front = {"id": source_id, "title": converted.title, **origin, "retrieved": today,
              "license": source.get("license") or UNKNOWN_LICENSE}
+    if source.get("restricted") is True:
+        front["restricted"] = True
     output = course_dir / "sources" / f"{source_id}.md"
     output.parent.mkdir(exist_ok=True)
     output.write_text(

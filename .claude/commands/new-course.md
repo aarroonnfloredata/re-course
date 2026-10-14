@@ -30,7 +30,8 @@ together with the author. The name comes from `$ARGUMENTS` if given.
      short `id` (lowercase letters, digits, hyphens) and a `url`, or a `path`
      relative to the workspace. Ask what each source's licence allows and
      record it as `license`; the author is responsible for the sources'
-     copyright.
+     copyright. If the licence limits sharing material built from the
+     source (e.g. no derivative works), set `restricted: true`.
    - `project_style`: `cumulative` (the default), where the exercises extend
      one scenario across the course; or `independent`, where each module's
      exercise stands alone (see `spec/exercises.md`). Suggest `independent`

@@ -32,8 +32,9 @@ format is in `spec/README.md` ("Sources").
    - A source that fails to download or convert: show the error. Suggest
      another URL or a local file only if the author has one.
    - `license unknown`: ask the author what the source allows and add
-     `license` to it in `brief.yaml`. If they don't know, leave it; the
-     warning comes back at publishing.
+     `license` to it in `brief.yaml`, with `restricted: true` if it limits
+     sharing material built from the source. If they don't know, leave it;
+     the warning comes back at publishing.
 
 4. **Finish** with a short report per source: sections, words, anything
    still open. The next step is `/outline`.

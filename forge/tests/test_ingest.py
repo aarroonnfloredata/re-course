@@ -172,7 +172,7 @@ def course(tmp_path, site):
     (course / "files/notes.md").write_text("# Notes\n\n## Tips\n\nUse quotes.\n")
     brief = {"sources": [
         {"id": "guide", "url": f"{base}/page.html", "license": "CC BY 4.0"},
-        {"id": "book", "path": "files/book.pdf"},
+        {"id": "book", "path": "files/book.pdf", "restricted": True},
         {"id": "notes", "path": "files/notes.md"},
     ]}
     (course / "brief.yaml").write_text(yaml.safe_dump(brief))
@@ -189,7 +189,9 @@ def test_ingest_writes_every_source(course, site):
     guide = front_matter(course / "sources/guide.md")
     assert guide == {"id": "guide", "title": "Shell Guide", "url": f"{site[1]}/page.html",
                      "retrieved": date(2026, 1, 2), "license": "CC BY 4.0"}
-    assert front_matter(course / "sources/book.md")["license"] == "unknown: check before publishing"
+    book_front = front_matter(course / "sources/book.md")
+    assert book_front["license"] == "unknown: check before publishing"
+    assert book_front["restricted"] is True
     assert front_matter(course / "sources/notes.md")["path"] == "files/notes.md"
     assert (course / "sources/raw/guide.html").is_file()
     book = next(report for report in reports if report.id == "book")

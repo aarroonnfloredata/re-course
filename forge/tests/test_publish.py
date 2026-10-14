@@ -52,6 +52,16 @@ def test_unknown_licence_needs_confirmation(workspace_course, root):
     assert published.unknown_licenses == {"pytutorial": ["01-strings"]}
 
 
+def test_restricted_licence_needs_its_own_confirmation(workspace_course, root):
+    edit(workspace_course / "sources/pytutorial.md", "excerpt:", "restricted: true\nexcerpt:")
+    with pytest.raises(PublishError, match=r"restricted licence.*\npytutorial \(cited by 01-strings\)"):
+        publish.publish(workspace_course, accept_unknown_licenses=True,
+                        shared_dir=root / "shared-workspace")
+    published = publish.publish(workspace_course, accept_restricted_licenses=True,
+                                shared_dir=root / "shared-workspace")
+    assert published.restricted_licenses == {"pytutorial": ["01-strings"]}
+
+
 def test_publishing_again_replaces_the_copy(workspace_course, root):
     shared = root / "shared-workspace"
     publish.publish(workspace_course, shared_dir=shared)
