@@ -11,7 +11,8 @@ which is plain Python with no AI.
   apply.
 - `.claude/skills/lang-<language>/`: how to write that language's material.
 - `examples/python/implement-strings/`: the reference course. When in doubt,
-  do what it does.
+  do what it does. `examples/python/refactor-long-method/` is the reference
+  for `refactor` modules.
 
 ## Layout
 
@@ -26,8 +27,9 @@ which is plain Python with no AI.
 
 ## Quality bar
 
-- Tests are the product. Every test fails on the starter files, passes on the
-  solution, and together they catch every broken variant.
+- Tests are the product. Every test fails on the starter files (except
+  `refactor` behaviour tests, which pass on them), passes on the solution,
+  and together they catch every broken variant.
 - Every failure message says in plain language what was expected and what
   came back.
 - Every factual claim cites a source section. Every runnable example and
