@@ -79,6 +79,7 @@ sources:
     license: "PSF License Version 2"   # optional
     restricted: false                  # optional
     selector: "div.body"               # optional; HTML pages only
+    exclude: [".breadcrumb"]           # optional; HTML pages only
 project_style: independent  # or: cumulative (the template's default)
 dependencies: []            # packages the course needs, e.g. ["polars>=1.0"]
 constraints: ["standard library only"]
@@ -97,6 +98,8 @@ Optional per source:
   `/publish` then needs the author's separate confirmation.
 - `selector`: a CSS selector for the page's main content, for when ingest's
   automatic choice picks up menus or footers.
+- `exclude`: a list of CSS selectors for parts of the main content to drop,
+  such as breadcrumbs or ads, for when no `selector` leaves them out.
 
 `dependencies` is copied into the course's `pyproject.toml`, which defines the
 course's own environment (see "Course environment").
