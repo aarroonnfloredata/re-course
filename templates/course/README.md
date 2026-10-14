@@ -23,7 +23,8 @@ runtime from there.
 
 ## Working through a module
 
-1. Read the lesson; `learn next` shows where it is. Run the examples yourself.
+1. Read the lesson; `learn next` shows where it is. Run the examples
+   yourself, in an empty folder of your own: some of them create files.
 2. Do each challenge when you reach it, and check it with `learn check c1`
    (using the challenge's ID).
 3. Write the exercise in the module's `exercise/` folder, then run
@@ -34,6 +35,8 @@ runtime from there.
 Once every check in a module passes, `learn next` moves on to the next one.
 
 Edit only the files in `exercise/` and `challenges/`. Never edit `tests/`.
+Each thing you write there starts as a stub: a `# TODO` line and a
+placeholder below it that makes its check fail. Replace both with your code.
 
 ## Commands
 

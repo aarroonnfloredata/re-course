@@ -55,6 +55,8 @@ def ingest(course_dir, ids=None, refresh=False, today=None):
             ingest_source(course_dir, source, report, refresh, today or date.today())
         except IngestError as error:
             report.error = str(error)
+        except Exception as error:  # a crash in one source must not stop the others
+            report.error = f"unexpected error: {type(error).__name__}: {error}"
         reports.append(report)
     return reports
 

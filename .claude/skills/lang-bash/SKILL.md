@@ -61,6 +61,11 @@ versions have, and only output both versions print the same way:
 - `awk`: macOS has the original awk. Use only POSIX features (no `gensub`,
   `asort`, ...).
 
+**Before the first exercise.** Make sure the course tells the learner to
+run examples in bash (their terminal may start another shell, such as zsh
+on macOS), and what exit status 0 means: starter files state exit statuses
+from the first module on.
+
 ## Starter files
 
 Every `.sh` file starts with `#!/usr/bin/env bash`. Learners and tests run
@@ -122,6 +127,8 @@ shout() {
   turn that line into the failure message.
 - Documentation states exact text for everything printed, errors included:
   tests compare whole lines.
+- Say what goes to stderr even when nothing should: "Print nothing else, to
+  stdout or to stderr."
 - Write examples as `... prints ...` lines.
 - A challenge is `challenges/<id>.sh`: one script or one function, starting
   with `# Challenge c1 – see "<section>" in lesson.md.`
@@ -207,6 +214,8 @@ def test_count_lines():
   leading spaces and empty strings), `>` instead of `>>`, `$1` and `$2`
   swapped, a missing or wrong exit status, output on stdout that belongs on
   stderr.
+- Check stderr in every run: `stderr=""` when nothing should go there. If a
+  header doesn't say what goes to stderr, report the gap.
 
 ### Challenge checks
 

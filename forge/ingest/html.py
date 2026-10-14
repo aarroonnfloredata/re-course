@@ -23,7 +23,9 @@ TOKEN = "ZZANCHOR{}ZZ"
 
 
 def convert(html, base_url=None, selector=None):
-    soup = BeautifulSoup(html, "html.parser")
+    # html5lib parses like a browser: it closes the <p> tags wikis leave open,
+    # where html.parser nests them hundreds deep.
+    soup = BeautifulSoup(html, "html5lib")
     title = page_title(soup)
     main, warnings = main_content(soup, selector)
     for pattern in REMOVE:

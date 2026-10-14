@@ -82,7 +82,7 @@ def check(run, stdout=None, status=0, stderr=None, hint=None):
     if stdout is not None and lines(run.stdout) != lines(stdout):
         message = subject(run) + compare("print", stdout, run.stdout)
     elif stderr is not None and lines(run.stderr) != lines(stderr):
-        message = subject(run) + compare("print to stderr", stderr, run.stderr)
+        message = subject(run) + compare("print", stderr, run.stderr, " to stderr")
     elif run.status != status:
         message = subject(run) + f"should exit with status {status}, but exited with {run.status}."
     else:
@@ -117,8 +117,11 @@ def subject(run):
     return f"`{run.command}` "
 
 
-def compare(verb, expected, actual):
-    should = f"should {verb}:\n{indent(expected)}\n" if lines(expected) else f"should {verb} nothing, "
+def compare(verb, expected, actual, where=""):
+    if lines(expected):
+        should = f"should {verb}{where}:\n{indent(expected)}\n"
+    else:
+        should = f"should {verb} nothing{where}, "
     but = f"but printed:\n{indent(actual)}" if lines(actual) else "but printed nothing."
     return should + but
 
@@ -134,4 +137,14 @@ def lines(text):
 
 
 def indent(text):
-    return "\n".join(f"    {line}" for line in lines(text))
+    return "\n".join(f"    {show(line)}" for line in lines(text))
+
+
+def show(line):
+    """A line as a message shows it: an empty or blank line gets a label, so
+    it can be seen."""
+    if not line:
+        return "(empty line)"
+    if not line.strip():
+        return f'(blank line: "{line}")'
+    return line

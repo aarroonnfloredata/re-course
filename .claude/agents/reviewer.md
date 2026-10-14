@@ -12,6 +12,7 @@ and the module ID. **You don't edit any file**; you only report.
 
 - `spec/README.md` and `spec/content.md`, for what a module should be.
 - `brief.yaml`, above all the `learner` line. Read everything as that person.
+- The course's `README.md`: the learner reads it before the first module.
 - Earlier modules' `recap.md`: what the learner already knows.
 - This module's learner files, in the order a learner meets them: `lesson.md`,
   each challenge file when the lesson reaches it, the `exercise/` starter

@@ -68,6 +68,15 @@ def test_html_without_a_main_element_warns():
     assert "used the whole page" in converted.warnings[0]
 
 
+def test_html_with_unclosed_paragraphs():
+    # Wikis leave <p> open; more of them than Python's recursion limit must
+    # still convert.
+    page = "<body><div id='content'><h2>Pitfalls</h2>" + "<p>Tip.\n" * 1500 + "</div></body>"
+    markdown = html.convert(page).markdown
+    assert markdown.startswith("## Pitfalls {#pitfalls}\n")
+    assert markdown.count("Tip.") == 1500
+
+
 # Markdown and text
 
 
@@ -216,6 +225,18 @@ def test_failed_download_is_reported(course):
     (course / "brief.yaml").write_text(yaml.safe_dump(brief))
     gone = ingest(course, ["gone"])[0]
     assert "could not download" in gone.error
+
+
+def test_crash_in_one_source_does_not_stop_the_others(course, monkeypatch, capsys):
+    def crash(*args, **kwargs):
+        raise RecursionError("maximum recursion depth exceeded")
+
+    monkeypatch.setattr(html, "convert", crash)
+    assert main([str(course)]) == 1
+    out = capsys.readouterr().out
+    assert "✗ guide: unexpected error: RecursionError: maximum recursion depth exceeded" in out
+    assert "✓ book: sources/book.md" in out
+    assert "✓ notes: sources/notes.md" in out
 
 
 def test_cli(course, capsys):

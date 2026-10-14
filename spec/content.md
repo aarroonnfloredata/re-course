@@ -16,7 +16,9 @@ In this order:
 3. "By the end of this module you can:" followed by the objectives as a
    numbered list: same objectives, same order as `module.yaml`. Wording may
    only add code formatting.
-4. A short "How to work through it" paragraph.
+4. A short "How to work through it" paragraph. It doesn't repeat what the
+   course `README.md` already tells the learner: where to run examples and
+   the starter stubs.
 5. One `##` section per topic, with `###` subsections where needed.
    Challenges sit in the section they practise.
 6. `## What's next`, linking the exercise files and `recap.md` and naming
@@ -85,6 +87,9 @@ The first character has index 0. ([pytutorial#text])
   IDs equals `sources` in `module.yaml`.
 - A claim may go uncited only when a runnable example in the same section
   shows it.
+- A short comparison with a language the brief's `learner` already knows
+  (`$1` is Python's `sys.argv[1]`) may go uncited. It must be correct, and
+  the rest of the sentence still needs its citation or example.
 
 The fact-checker compares each cited claim with the cited section.
 
@@ -96,7 +101,7 @@ Every file the lesson mentions is a relative link from `lesson.md`:
 ## Challenges
 
 A challenge is a short task in the middle of the lesson, completable in a few
-minutes. A module has 2–3.
+minutes. A module has 2–4.
 
 In the lesson, a challenge is an HTML comment followed directly by a
 blockquote:
@@ -170,6 +175,6 @@ A list of 5–7 questions:
 ```
 
 - `# Recap: <short title>` followed by a bullet list.
-- At most 7 points and 150 words.
+- At most 150 words.
 - Each point ends with `(objective N)`; every objective appears at least once.
 - No material the lesson didn't cover.

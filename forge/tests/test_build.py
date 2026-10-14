@@ -77,6 +77,13 @@ def test_trial_runs_with_learn(course):
     assert "Next: Strings: Indexing, Slicing and Methods (01-strings)" in process.stdout
 
 
+def test_trial_leaves_out_unbuilt_modules(course):
+    outline.write_modules(course / "course.yaml", ["01-strings", "02-lists"])
+    target = trial.create(course)
+    assert yaml.safe_load((target / "course.yaml").read_text())["modules"] == ["01-strings"]
+    assert trial.split_modules(course) == (["01-strings"], ["02-lists"])
+
+
 def test_trial_refuses_to_overwrite_unless_fresh(course):
     target = trial.create(course)
     answer = target / "modules/01-strings/challenges/c1.py"
