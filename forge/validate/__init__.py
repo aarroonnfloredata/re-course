@@ -7,11 +7,11 @@ The validator judges; agents fix what it reports.
 
 from pathlib import Path
 
-from . import core, implement, outline
+from . import core, implement, outline, refactor
 from .report import Report, Section
 from .runner import RunnerError, run_jobs
 
-EXERCISE_TYPES = {"implement": implement}
+EXERCISE_TYPES = {"implement": implement, "refactor": refactor}
 
 
 def validate(course_dir, modules=None, execute=True, outline_only=False):
@@ -43,8 +43,11 @@ def validate(course_dir, modules=None, execute=True, outline_only=False):
             report.groups.append((module_id, [Section("files", [f"modules/{module_id}/ doesn't exist"])]))
             continue
         sections, module = core.check_module(course, module_dir)
-        if module is not None and execute:
-            sections += run_checks(module)
+        exercise_type = EXERCISE_TYPES.get(module.data["exercise_type"]) if module else None
+        if exercise_type is not None:
+            sections += exercise_type.static(module)
+            if execute:
+                sections += run_checks(module, exercise_type)
         report.groups.append((module_id, sections))
     return report
 
@@ -73,8 +76,7 @@ def resolve(course, names):
     return found
 
 
-def run_checks(module):
-    exercise_type = EXERCISE_TYPES[module.data["exercise_type"]]
+def run_checks(module, exercise_type):
     jobs = {**core.jobs(module), **exercise_type.jobs(module)}
     try:
         results = run_jobs(module.course.dir, jobs)
