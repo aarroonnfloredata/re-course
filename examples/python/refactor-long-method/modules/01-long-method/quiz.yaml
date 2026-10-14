@@ -1,0 +1,121 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: multiple-choice
+  prompt: Which of these changes is a refactoring?
+  options:
+    - "Charging shipping on empty orders, which the code forgot to do"
+    - "Moving the shipping rule into its own function, called where the rule was"
+    - "Adding a new discount code, SAVE20"
+  answer: 1
+  explanation: >-
+    A refactoring changes the code's shape but not what it does. Moving the
+    rule into a function and calling it keeps every result the same. Fixing
+    a bug and adding a discount code both change what the code does, even if
+    they are good changes.
+
+- id: q2
+  objective: 2
+  type: multiple-choice
+  prompt: >-
+    A colleague says a 90-line function is "a smell". What does that tell
+    you?
+  options:
+    - "The function has a bug that needs fixing first"
+    - "The function must be split before anything else can change"
+    - "Something about its design may be wrong; it is worth a closer look"
+  answer: 2
+  explanation: >-
+    A code smell is a hint that something may be wrong, not evidence of a
+    problem. Smells are usually not bugs: the function may work perfectly.
+    Whether and when to refactor it is a judgement call.
+
+- id: q3
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    def subtotal(items):
+        total = 0
+        for price, qty in items:
+            total += price * qty
+
+
+    def receipt(items):
+        return f"Subtotal: {subtotal(items)}"
+
+
+    print(receipt([(2.5, 2), (1.0, 3)]))
+  options: ["Subtotal: 8.0", "Subtotal: 0", "Subtotal: None"]
+  answer: 2
+  explanation: >-
+    The extracted function adds up the total but never returns it, so the
+    call gives None. A function without a return statement returns None, not
+    its last local value and not 0.
+
+- id: q4
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    def add_fee(total):
+        total = total + 2
+
+
+    def charge(total):
+        add_fee(total)
+        return total
+
+
+    print(charge(10))
+  options: ["12", "10", "None"]
+  answer: 1
+  explanation: >-
+    Inside add_fee(), total is its own variable: assigning to it doesn't
+    change the caller's total. charge() returns its own unchanged total, 10.
+    The extracted function should return the new value and charge() should
+    store it.
+
+- id: q5
+  objective: 3
+  type: spot-the-bug
+  prompt: >-
+    print_report() was refactored with Extract Method, but now it raises
+    NameError. Which change fixes it?
+  code: |
+    def print_report(name, scores):
+        print_average()
+        print(f"{len(scores)} scores for {name}")
+
+
+    def print_average():
+        print(f"Average: {sum(scores) / len(scores):.1f}")
+  options:
+    - "Pass the scores in: def print_average(scores) and call print_average(scores)"
+    - "Move print_average() above print_report() in the file"
+    - "Return the average from print_average() instead of printing it"
+  answer: 0
+  explanation: >-
+    The block read `scores`, a parameter of print_report(). After the move,
+    print_average() has no variable of that name, so the values a block reads
+    must become parameters. The order of definitions in the file doesn't
+    matter here, and returning instead of printing doesn't give it `scores`.
+
+- id: q6
+  objective: 4
+  type: multiple-choice
+  prompt: >-
+    You extract the shipping rule into a function and a behaviour test now
+    fails. What do you do?
+  options:
+    - "Update the test so it expects the new output"
+    - "Undo the last step and extract the rule again, more carefully"
+    - "Carry on with the next extraction and fix the test at the end"
+  answer: 1
+  explanation: >-
+    A failing behaviour test means the last step changed what the code does.
+    Undoing it gets you back to working code; then redo the step a different
+    way. Changing the test hides the change, and carrying on piles more
+    changes on top of a broken one.
