@@ -133,6 +133,10 @@ def check_brief(brief, section):
         for optional in ("license", "selector"):
             if optional in source and not (isinstance(source[optional], str) and source[optional].strip()):
                 section.add(f"brief.yaml: sources/{index}: {optional} must be text")
+        if "exclude" in source and not (
+                isinstance(source["exclude"], list) and source["exclude"]
+                and all(isinstance(item, str) and item.strip() for item in source["exclude"])):
+            section.add(f"brief.yaml: sources/{index}: exclude must be a list of CSS selectors")
         if "restricted" in source and not isinstance(source["restricted"], bool):
             section.add(f"brief.yaml: sources/{index}: restricted must be true or false")
     return ids
