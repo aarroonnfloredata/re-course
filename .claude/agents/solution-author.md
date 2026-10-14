@@ -17,8 +17,11 @@ documentation, not from what the tests happen to check.
 - `spec/README.md`, `spec/exercises.md` and
   `spec/exercise-types/<exercise_type>.md`.
 - `.claude/skills/lang-<language>/SKILL.md` for the course's language.
-- The golden module's `solution/` and `broken/`
-  (`examples/python/implement-strings/modules/01-strings/`), for their form.
+- The golden module's `solution/` and `broken/` for the module's
+  `exercise_type` (`examples/python/implement-strings/modules/01-strings/`
+  or `examples/python/refactor-long-method/modules/01-long-method/`), for
+  their form.
+- Refactor modules: `.claude/skills/exercise-refactor/SKILL.md`.
 - This module: `module.yaml`, `lesson.md` (to use only what it teaches),
   `challenges/` and `exercise/`; earlier modules' `recap.md`.
 
@@ -36,11 +39,24 @@ documentation, not from what the tests happen to check.
   arbitrary sabotage (`return None`), and not behaviour the documentation
   leaves open.
 
+In a refactor module, the solution is the starter refactored as the task
+statement asks, meeting every target with some room; the task statement and
+the interface docstrings stay unchanged. Variants are of two kinds, named in
+their first line: `behaviour` (a refactoring step that changed what the code
+does) and `smell` (same behaviour, but a target is still missed). At least
+one of each.
+
 ## Check, then report
 
 Without the tests: run every documented example against your solution (the
 language skill says how) and confirm the results. For
 each variant, find a documented example or edge case it gets wrong.
+
+In a refactor module, run the starter and your solution on the same inputs,
+odd cases included, and confirm they give the same results. Each `behaviour`
+variant must differ from the starter on some input; each `smell` variant
+must match it on every input and clearly miss a target (measure it as the
+language skill shows).
 
 Report briefly: the files you wrote, for each variant the documented
 behaviour it breaks, and any gaps in the starter documentation.
