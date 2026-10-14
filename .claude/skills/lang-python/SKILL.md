@@ -1,6 +1,6 @@
 ---
 name: lang-python
-description: "How to write Python course material for re-course - starter stubs, challenge and exercise tests (pytest), solutions, broken variants, runnable lesson examples and predict-output quiz code. Use when writing or fixing any of these for a module with `language: python`."
+description: "How to write Python course material for re-course - starter stubs, challenge and exercise tests (pytest; behaviour tests and structural checks for refactor modules), solutions, broken variants, runnable lesson examples and predict-output quiz code. Use when writing or fixing any of these for a module with `language: python`."
 ---
 
 # Python course material
@@ -149,6 +149,115 @@ def test_c1_last_char():
   ```python
   # Broken variant: mask() keeps the first `keep` characters instead of the last.
   ```
+
+## Refactor modules
+
+For `exercise_type: refactor`. Read `.claude/skills/exercise-refactor/`
+first. Reference module:
+`examples/python/refactor-long-method/modules/01-long-method/`.
+
+### Starter files
+
+Working legacy code, no stubs. The module docstring states the task (see the
+exercise-refactor skill); the interface functions keep their docstrings,
+which describe what they do, not the task.
+
+### Test files
+
+```
+tests/
+├── conftest.py          # copy from the implement reference module, unchanged
+├── helpers.py           # copy from the implement reference module, unchanged
+├── refactoring.py       # copy from the refactor reference module, unchanged
+├── test_challenges.py   # one test per challenge: test_<id>_<what>
+├── test_behaviour.py    # behaviour tests: pass on the starter
+└── test_structure.py    # structural checks (and test_extension.py for a new requirement)
+```
+
+`refactoring.py` provides, for behaviour tests:
+
+- `keeps(func, args, before, kwargs=None)`: fails with "Behaviour changed:
+  … returned X before the refactoring, but now returns Y." unless the call
+  still returns `before`.
+- `keeps_output(func, args, before, kwargs=None)`: the same for what the
+  call prints, shown as indented lines.
+- `keeps_raising(func, args, error_type, kwargs=None)`: the call still
+  raises `error_type`.
+
+and for structural checks, each failing with a message that names the
+property, the value and the target:
+
+- `max_length(path, limit, names=None)`: lines of code in each function's
+  body, not counting the docstring, blank lines and comment lines.
+- `max_complexity(path, limit, names=None)`: cyclomatic complexity, counted
+  the way radon counts it (`if`, `elif`, `for`, `while`, `except`, `with`,
+  `assert`, conditional expressions, comprehensions, match cases, each extra
+  `and`/`or` operand).
+- `max_nesting(path, limit, names=None)`: how deep blocks sit inside each
+  other; an `elif` is not a level.
+- `max_parameters(path, limit, names=None)`: parameters without `self` and
+  `cls`.
+- `no_comments(path, names=None)`: no comments inside functions.
+- `functions(path)` and `function(path, name)`: the file's functions and
+  methods (`"Class.method"`), each with `.length`, `.complexity`,
+  `.nesting`, `.parameters`, `.comments`, `.calls` (names it calls),
+  `.reassigned` (local names assigned with `=` more than once) and
+  `.assigned_parameters`. Use them with `fail(message)` for a target the
+  helpers above don't cover.
+
+`names=None` checks every function and method in the file. `path` is
+relative to the module, like `load()`.
+
+To measure a file before the module has tests (the smell-author and the
+solution-author do this), use the reference module's copy with an absolute
+path, in the course folder:
+
+```
+uv run python -c "
+import sys, pathlib
+sys.path.insert(0, '../../examples/python/refactor-long-method/modules/01-long-method/tests')
+from refactoring import functions
+path = pathlib.Path('modules/<id>/exercise/<file>.py').resolve()
+for f in functions(path).values():
+    print(f, f.length, f.complexity, f.nesting, len(f.parameters), f.comments)
+"
+```
+
+```python
+@pytest.mark.objective(1, 4)
+@pytest.mark.parametrize("order, printed", RECEIPTS)
+def test_print_receipt_prints_the_same(order, printed):
+    receipt = load(EXERCISE)
+    keeps_output(receipt.print_receipt, (order,), printed)
+
+
+@pytest.mark.objective(2, 3)
+def test_no_function_is_longer_than_10_lines():
+    max_length(EXERCISE, 10)
+```
+
+- Behaviour cases use `pytest.param(..., id="what-it-pins")`, so a failure
+  names the behaviour.
+- Get every expected value by running the starter in the course's
+  environment (`uv run python -c ...`) and copying the result.
+- A challenge check uses `check()` from `helpers.py` for the new function,
+  `function(...).calls` to see that the old code calls it, then `keeps()` or
+  `keeps_output()` for the old behaviour. A missing function is a `fail()`
+  with a plain message, not an `AttributeError`.
+
+### Solutions and broken variants
+
+- The solution is the refactored starter file. The module docstring (the
+  task) and the interface docstrings stay exactly the same.
+- A variant's first line names its kind:
+
+  ```python
+  # Broken variant: behaviour: shipping_for() is given the subtotal before the discount.
+  # Broken variant: smell: the item lines and totals are still printed inside print_receipt().
+  ```
+
+- Check a smell variant against the targets yourself: it must miss one by
+  more than a line or two, or it may pass the structural checks.
 
 ## Runnable examples and quiz code
 
