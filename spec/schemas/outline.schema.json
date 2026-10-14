@@ -60,7 +60,8 @@
           "minLength": 1
         },
         "exercise_type": {
-          "enum": ["implement"]
+          "description": "refactor is planned and has no spec yet; a module can't be built with it until spec/exercise-types/refactor.md exists.",
+          "enum": ["implement", "refactor"]
         },
         "introduces": {
           "description": "Concepts this module teaches for the first time.",
