@@ -1,0 +1,21 @@
+id: 02-variables-and-arguments
+title: Variables, Arguments and Command Substitution
+exercise_type: implement
+language: bash
+prerequisites:
+- 01-pipes-and-redirection
+objectives:
+- Assign variables without spaces around = and expand them with $ and ${ }
+- Read a script's arguments with $1, $2, … and count them with $#
+- Capture a command's output in a variable with $( )
+sources:
+- bashguide-parameters#Parameters
+- bashguide-parameters#Special_Parameters_and_Variables
+- bashguide-io#Command-line_Arguments
+- tlcl#variables-and-constants
+- tlcl#assigning-values-to-variables-and-constants
+- tlcl#accessing-the-command-line
+- tlcl#determining-the-number-of-arguments
+- tlcl#command-substitution
+- bashpitfalls#foo_.3D_bar
+- bashpitfalls#A.24foo.3Dbar

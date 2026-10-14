@@ -1,0 +1,21 @@
+id: 10-find-and-xargs
+title: Finding Files with find and xargs
+exercise_type: implement
+language: bash
+prerequisites:
+- 09-awk
+objectives:
+- Find files by name, type and size with find's tests
+- Combine tests with ! and -o
+- Run a command on the found files with -exec ... {} +
+- Pass file names with spaces safely to xargs with -print0 and -0
+sources:
+- tlcl#find-find-files-the-hard-way
+- tlcl#tests
+- tlcl#operators
+- tlcl#predefined-actions
+- tlcl#user-defined-actions
+- tlcl#improving-efficiency
+- tlcl#xargs
+- bashpitfalls#Using_xargs_without_-0
+- bashpitfalls#find_._-exec_sh_-c_.27echo_.7B.7D.27_.2BAFw.3B

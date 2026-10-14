@@ -1,0 +1,27 @@
+id: 01-pipes-and-redirection
+title: Scripts, Pipes and Redirection
+exercise_type: implement
+language: bash
+prerequisites: []
+objectives:
+- Write commands in a script file and run it with bash
+- Send a command's output to a file with > and >>, and feed a file to it with <
+- 'Keep error messages apart from output: send them to stderr with >&2, to a file with 2>, or away to /dev/null'
+- Connect commands with | and narrow lines down and count them with grep, head and tail
+sources:
+- bashguide-commands#Commands_and_Arguments
+- bashguide-commands#Scripts
+- tlcl#script-file-format
+- tlcl#standard-input-output-and-error
+- tlcl#redirecting-standard-output
+- tlcl#redirecting-standard-error
+- tlcl#redirecting-standard-output-and-standard-error-to-one-file
+- tlcl#disposing-of-unwanted-output
+- tlcl#redirecting-standard-input
+- tlcl#pipelines
+- tlcl#grep-print-lines-matching-a-pattern
+- tlcl#head-tail-print-first-last-part-of-files
+- bashguide-io#File_Descriptors-1
+- bashguide-io#File_Redirection-1
+- bashguide-io#File_Descriptor_Manipulation-1
+- bashguide-io#Pipes-1

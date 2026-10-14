@@ -1,0 +1,25 @@
+id: 05-loops-and-case
+title: Loops, Arithmetic and case
+exercise_type: implement
+language: bash
+prerequisites:
+- 04-exit-status-and-conditions
+objectives:
+- Loop over the files a glob matches with for, and skip a glob that matched nothing
+- Read a file line by line, split into fields, with while read -r
+- Count and add with $(( )) and (( ))
+- Choose between patterns with case
+sources:
+- bashguide-tests#Conditional_Loops_.28while.2C_until_and_for.29
+- bashguide-tests#Choices_.28case_and_select.29
+- tlcl#for-traditional-shell-form
+- tlcl#while
+- tlcl#break-and-continue
+- tlcl#reading-files-with-loops
+- tlcl#arithmetic-expansion
+- tlcl#designed-for-integers
+- bashguide-compound#Arithmetic_Evaluation
+- tlcl#case
+- tlcl#patterns
+- bashpitfalls#for_f_in_.24.28ls_.2A.mp3.29
+- bashpitfalls#grep_foo_bar_.7C_while_read_-r.3B_do_.28.28count.2B-.2B-.29.29.3B_done

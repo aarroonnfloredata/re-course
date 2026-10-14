@@ -1,0 +1,15 @@
+id: 06-cut-sort-uniq
+title: Cutting, Sorting and Counting
+exercise_type: implement
+language: bash
+prerequisites:
+- 05-loops-and-case
+objectives:
+- Pick fields out of each line with cut
+- Sort lines as text or as numbers, in either order, with sort
+- Count repeated lines with sort | uniq -c
+- Rank values with one pipeline and reformat its output with while read
+sources:
+- tlcl#cut
+- tlcl#sort
+- tlcl#uniq

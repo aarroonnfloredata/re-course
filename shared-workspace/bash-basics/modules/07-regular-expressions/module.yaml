@@ -1,0 +1,27 @@
+id: 07-regular-expressions
+title: Regular Expressions with grep
+exercise_type: implement
+language: bash
+prerequisites:
+- 06-cut-sort-uniq
+objectives:
+- Anchor a pattern to the start or end of a line, and match any character or one of a set
+- Repeat parts of a pattern with *, +, ? and { }
+- Match alternatives and groups with | and ( ) in grep -E
+- Leave out matching lines and ignore case with grep -v and -i
+sources:
+- tlcl#what-are-regular-expressions
+- tlcl#grep
+- tlcl#metacharacters-and-literals
+- tlcl#the-any-character
+- tlcl#anchors
+- tlcl#bracket-expressions-and-character-classes
+- tlcl#negation
+- tlcl#posix-character-classes
+- tlcl#posix-basic-vs-extended-regular-expressions
+- tlcl#alternation
+- tlcl#quantifiers
+- tlcl#match-an-element-zero-or-one-time
+- tlcl#match-an-element-zero-or-more-times
+- tlcl#match-an-element-one-or-more-times
+- tlcl#match-an-element-a-specific-number-of-times

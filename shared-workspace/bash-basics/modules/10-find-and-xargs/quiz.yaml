@@ -1,0 +1,181 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    mkdir logs
+    touch access.log logs/access.log logs/error.log
+    find logs -name *.log
+  options:
+    - "access.log"
+    - "logs/access.log"
+    - |-
+      logs/access.log
+      logs/error.log
+  answer: 1
+  explanation: >-
+    The pattern isn't quoted, so bash expands *.log before find runs. In
+    the current folder it matches access.log, so find gets -name
+    access.log and finds only logs/access.log. With quotes, '*.log', find
+    gets the pattern itself and also finds logs/error.log. find prints
+    paths that start with the folder you gave it, logs, not bare names.
+
+- id: q2
+  objective: 1
+  type: multiple-choice
+  prompt: >-
+    Which command lists the regular files under logs that hold more than
+    1,000 bytes?
+  options:
+    - "find logs -type f -size 1000c"
+    - "find logs -type f -size +1000"
+    - "find logs -type f -size +1000c"
+    - "find logs -type f -size -1000c"
+  answer: 2
+  explanation: >-
+    A leading + means "more than", and the c after the number counts in
+    bytes. Without a sign, -size 1000c matches files of exactly 1,000
+    bytes; a leading - means "less than". Without a unit, find counts in
+    512-byte blocks, so -size +1000 means more than 1,000 blocks, not
+    bytes.
+
+- id: q3
+  objective: 2
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    mkdir logs
+    echo "2026-10-06T10:15:32 203.0.113.5 GET /index.html 200 512" > logs/access.log
+    touch logs/empty.log logs/empty.old
+    find logs -name '*.log' -o -name '*.old' ! -empty | sort
+  options:
+    - |-
+      logs/access.log
+      logs/empty.log
+    - "logs/access.log"
+    - |-
+      logs/access.log
+      logs/empty.log
+      logs/empty.old
+  answer: 0
+  explanation: >-
+    -and binds tighter than -o, so the command means
+    -name '*.log' -o ( -name '*.old' ! -empty ): ! -empty goes with
+    -name '*.old' only. Every .log file is listed, empty.log included.
+    empty.old matches -name '*.old', but ! -empty is false for it. For !
+    to apply to both names, group them: \( -name '*.log' -o -name '*.old'
+    \) ! -empty.
+
+- id: q4
+  objective: 2
+  type: spot-the-bug
+  prompt: >-
+    This command should list the regular files under logs whose names end
+    in .log or .old, but it also lists a folder called logs/archive.old.
+    Which command fixes it?
+  code: |
+    find logs -type f -name '*.log' -o -name '*.old'
+  options:
+    - |-
+      find logs -type f -a -name '*.log' -o -name '*.old'
+    - |-
+      find logs \( -type f -name '*.log' \) -o -name '*.old'
+    - |-
+      find logs -type f ( -name '*.log' -o -name '*.old' )
+    - |-
+      find logs -type f \( -name '*.log' -o -name '*.old' \)
+  answer: 3
+  explanation: >-
+    -type f is joined to -name '*.log' only, so the right side of -o,
+    -name '*.old', lets the folder through. The parentheses make the two
+    names one test, which -type f then applies to. Writing the -a out
+    changes nothing: it is implied anyway. Grouping -type f with the left
+    name is what find already did. Unescaped, ( and ) mean something to
+    bash, so the command doesn't even reach find: escape them as \( and \).
+
+- id: q5
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    mkdir -p logs/old
+    touch logs/access.log logs/error.log logs/old/monday.log
+    find logs -name '*.log' -exec echo run {} \; | grep -c run
+    find logs -name '*.log' -exec echo run {} + | grep -c run
+  options:
+    - |-
+      1
+      3
+    - |-
+      3
+      1
+    - |-
+      3
+      3
+    - |-
+      1
+      1
+  answer: 1
+  explanation: >-
+    With \; find runs echo once for each of the three files, so three lines
+    hold "run". With + it collects the three paths into one argument list
+    and runs echo once, which prints one line. "1 3" swaps the two forms.
+    "3 3" and "1 1" treat them as the same.
+
+- id: q6
+  objective: 3
+  type: spot-the-bug
+  prompt: >-
+    This command should print the number of 500 requests in each .log file
+    under logs, but a file name holding $( ) or ; runs as code. Which
+    command keeps the sh -c script and passes each name safely?
+  code: |
+    find logs -name '*.log' -exec sh -c 'grep -c " 500 " {}' \;
+  options:
+    - |-
+      find logs -name '*.log' -exec sh -c 'grep -c " 500 " "$1"' x {} \;
+    - |-
+      find logs -name '*.log' -exec sh -c 'grep -c " 500 " "{}"' \;
+    - |-
+      find logs -name '*.log' -exec sh -c "grep -c ' 500 ' {}" \;
+  answer: 0
+  explanation: >-
+    find puts the name into the script where {} stands, as the lesson's
+    example shows, so sh may read the name as part of its code.
+    Double quotes around {} don't help: $( ) still runs inside double
+    quotes. Writing the script in double quotes instead changes only which
+    quotes surround it. Passed after the script, the name is an argument,
+    which the script reads as "$1" without ever running it. The x before it
+    becomes $0, as the lesson's example shows, so the name lands in $1.
+
+- id: q7
+  objective: 4
+  type: spot-the-bug
+  prompt: >-
+    This command should print FILE:N for every .log file under logs. For
+    the file logs/monday log.log, it prints error messages instead. Which
+    command fixes it?
+  code: |
+    find logs -name '*.log' | xargs grep -c -H " 404 "
+  options:
+    - |-
+      find logs -name '*.log' -print0 | xargs grep -c -H " 404 "
+    - |-
+      find logs -name '*.log' | xargs -0 grep -c -H " 404 "
+    - |-
+      find logs -name '*.log' -print0 | xargs -0 grep -c -H " 404 "
+    - |-
+      find logs -name '*.log' -print | xargs grep -c -H " 404 "
+  answer: 2
+  explanation: >-
+    xargs splits its input at whitespace, so grep gets logs/monday and
+    log.log as two names. -print0 separates the paths with null
+    characters, and -0 makes xargs split only there: you need both. With
+    -print0 alone, xargs still splits at whitespace; with -0 alone, find
+    writes no null characters, so xargs never finds a place to split.
+    Writing -print out changes nothing: it is the default action, and it
+    still puts each path on a line of its own, which xargs splits at
+    whitespace.

@@ -1,0 +1,162 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: predict-output
+  prompt: >-
+    The first line writes a one-line script, nargs.sh. What does the last
+    line print?
+  code: |
+    echo 'echo "$# arguments"' > nargs.sh
+    logfile="monday log.log"
+    bash nargs.sh $logfile 404
+  options:
+    - "2 arguments"
+    - "3 arguments"
+    - "4 arguments"
+  answer: 1
+  explanation: >-
+    $logfile is not in quotes, so after bash expands it, word splitting
+    splits the value at the space into two words, monday and log.log. With
+    404 that makes 3 arguments. "2 arguments" needs "$logfile" in double
+    quotes: the variable holds the whole name, but the quotes around the
+    value in the assignment don't protect it later. "4 arguments" counts the
+    script's name, which $# never does.
+
+- id: q2
+  objective: 1
+  type: predict-output
+  prompt: >-
+    The folder holds a.log and b.log after the first two lines. What does the
+    last line print?
+  code: |
+    echo "GET /index.html 200" > a.log
+    echo "GET /missing.html 404" > b.log
+    hint="Usage: countall.sh STATUS *.log"
+    echo $hint
+  options:
+    - "Usage: countall.sh STATUS *.log"
+    - "Usage: countall.sh STATUS a.log"
+    - "Usage: countall.sh STATUS a.log b.log"
+  answer: 2
+  explanation: >-
+    The variable holds the text *.log unchanged, but $hint is not quoted:
+    its value is split into words, and the word *.log is a glob that
+    matches files, so bash replaces it with all the matching names, sorted.
+    "*.log" stays as it is only with echo "$hint", or when no file matches.
+    A glob is replaced by every matching name, not just the first.
+
+- id: q3
+  objective: 2
+  type: spot-the-bug
+  prompt: >-
+    last.sh should print the last line of the log file named by its first
+    argument. `bash last.sh "monday log.log"` prints errors about files
+    called monday and log.log instead. Which replacement line fixes it?
+  code: |
+    logfile=$1
+    tail -n 1 $logfile
+  options:
+    - 'logfile="$1"'
+    - 'tail -n 1 "$logfile"'
+    - "tail -n 1 '$logfile'"
+  answer: 1
+  explanation: >-
+    The split happens where $logfile is expanded unquoted, in the tail line,
+    so that is where the double quotes go: "$logfile" is one argument,
+    spaces and all. The assignment is already fine; quoting $1 there
+    changes nothing, because the whole value is assigned either way. Single
+    quotes stop the expansion, so tail looks for a file literally called
+    $logfile.
+
+- id: q4
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    status=404
+    echo 'status: $status' "\$status is $status"
+  options:
+    - "status: 404 404 is 404"
+    - "status: $status \\$status is 404"
+    - "status: $status $status is 404"
+    - "status: 404 $status is 404"
+  answer: 2
+  explanation: >-
+    Inside single quotes nothing is expanded, so the first argument stays
+    "status: $status". Inside double quotes $status is expanded, but a
+    backslash stops the $ right after it, and the backslash itself is
+    removed: \$status prints $status, and the second $status becomes 404.
+    Single quotes don't act like double quotes, and the backslash doesn't
+    stay in the output.
+
+- id: q5
+  objective: 4
+  type: predict-output
+  prompt: What does the last line print?
+  code: |
+    echo "GET /about.html 200" > access-2026-09-30.log
+    echo "GET /index.html 200" > access-2026-10-05.log
+    echo "GET /missing.html 404" > access-2026-10-06.log
+    month=2026-10
+    echo "access-$month-"*.log
+  options:
+    - "access-2026-10-05.log access-2026-10-06.log"
+    - "access-2026-10-*.log"
+    - "access-$month-*.log"
+  answer: 0
+  explanation: >-
+    The quoted piece and the unquoted *.log make one word, access-2026-10-*.log.
+    Double quotes expand $month and keep it one piece, and the * is outside
+    them, so pathname expansion still happens and bash replaces the word
+    with the two October logs. "access-2026-10-*.log" would need the * inside
+    the quotes, which stop pathname expansion. "access-$month-*.log" would
+    need single quotes, which stop the $ as well.
+
+- id: q6
+  objective: 5
+  type: predict-output
+  prompt: >-
+    The first three lines write two scripts, nargs.sh and pass.sh. What does
+    the last line print?
+  code: |
+    echo 'echo "$# arguments, first: $1"' > nargs.sh
+    echo 'shift' > pass.sh
+    echo 'bash nargs.sh "$@"' >> pass.sh
+    bash pass.sh 404 "monday log.log" access.log
+  options:
+    - "3 arguments, first: 404"
+    - "2 arguments, first: monday log.log"
+    - "3 arguments, first: monday"
+  answer: 1
+  explanation: >-
+    After shift, 404 is gone: the script has 2 arguments left, and the
+    first of them is now "monday log.log". "$@" then passes each remaining
+    argument on as one word, unchanged, so the name keeps its space. "3
+    arguments, first: 404" forgets the shift; "3 arguments, first: monday"
+    is what an unquoted $@ would give after the shift.
+
+- id: q7
+  objective: 5
+  type: spot-the-bug
+  prompt: >-
+    countall.sh should print FILE:N for each file it is given. `bash
+    countall.sh 404 "monday log.log" access.log` prints errors about files
+    called monday and log.log instead. Which last line fixes it?
+  code: |
+    status=$1
+    shift
+    grep -c -H " $status " $*
+  options:
+    - 'grep -c -H " $status " "$@"'
+    - 'grep -c -H " $status " "$*"'
+    - "grep -c -H ' $status ' \"$@\""
+  answer: 0
+  explanation: >-
+    Unquoted, $* gives the words of the arguments, so "monday log.log" falls
+    apart into two file names. "$@" gives each argument as its own word,
+    unchanged. "$*" goes too far the other way: it joins all the arguments
+    into one word, "monday log.log access.log", which names no file. Single
+    quotes around the pattern stop the expansion, so grep looks for the
+    text $status.

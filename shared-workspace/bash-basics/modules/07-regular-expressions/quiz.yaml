@@ -1,0 +1,165 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "/v1.2/status" > paths.txt
+    echo "/v132/status" >> paths.txt
+    echo "/v12/status" >> paths.txt
+    grep -c 'v1.2' paths.txt
+  options: ["1", "2", "3"]
+  answer: 1
+  explanation: >-
+    A dot matches any one character, not only a dot, so v1.2 matches both
+    "v1.2" and "v132". It needs exactly one character between the 1 and the
+    2, so "v12" doesn't match. "1" reads the dot as a real dot; the pattern
+    for that is v1\.2. "3" treats the dot like a glob's *, as any text,
+    even none.
+
+- id: q2
+  objective: 1
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "/admin" > paths.txt
+    echo "/admin/users" >> paths.txt
+    echo "/admin.php" >> paths.txt
+    grep '^/admin[^/]' paths.txt
+  options:
+    - "/admin.php"
+    - |-
+      /admin
+      /admin.php
+    - "/admin/users"
+    - |-
+      /admin
+      /admin/users
+      /admin.php
+  answer: 0
+  explanation: >-
+    [^/] stands for exactly one character, and it can't be a slash. After
+    /admin, the path /admin/users has a slash, and /admin has nothing at
+    all: the line ends, so there is no character for [^/] to match. Only
+    /admin.php has one, the dot. The option with /admin and /admin.php lets
+    [^/] match nothing at the end of the line. "/admin/users" drops the ^ in
+    the brackets, as if the set were [/]; only the ^ at the start of the
+    pattern is an anchor. The last option reads [^/] as optional, like
+    [^/]*.
+
+- id: q3
+  objective: 2
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "/admin" > paths.txt
+    echo "/admin/users" >> paths.txt
+    echo "/administrator" >> paths.txt
+    grep -E '^/admin*$' paths.txt
+  options:
+    - |-
+      /admin
+      /admin/users
+      /administrator
+    - |-
+      /admin
+      /administrator
+    - "/admin"
+  answer: 2
+  explanation: >-
+    In a regular expression, * repeats the element just before it, here the
+    n. So ^/admin*$ matches /admi, /admin, /adminn and so on, with nothing
+    after them, because of the $. Of the three lines, only /admin does. The
+    other options read * as a glob's "any text", with or without slashes;
+    in a regular expression, any text is .* (any character, any number of
+    times).
+
+- id: q4
+  objective: 2
+  type: spot-the-bug
+  prompt: >-
+    This command should print the requests in access.log with a status from
+    400 to 599. It prints nothing and exits with status 1. Which command
+    fixes it?
+  code: |
+    grep ' [45][0-9]{2} ' access.log
+  options:
+    - 'grep " [45][0-9]{2} " access.log'
+    - "grep -E ' [45][0-9]{2} ' access.log"
+    - "grep ' [45]([0-9]){2} ' access.log"
+  answer: 1
+  explanation: >-
+    Without -E, grep reads a basic regular expression, in which { and } are
+    plain characters: it looks for the text {2}, which no line holds. -E
+    makes {2} mean "twice". The kind of quotes doesn't matter here: the
+    pattern holds no $ or \, so with single or double quotes grep gets the
+    same pattern. Putting [0-9] in a group doesn't help: without -E, ( and )
+    are plain characters too, and {2} can repeat a single bracket
+    expression anyway.
+
+- id: q5
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "POST /login" > requests.txt
+    echo "GET /blog/POST" >> requests.txt
+    echo "PUT /files/a.txt" >> requests.txt
+    echo "GET /index.html" >> requests.txt
+    grep -E -c '^PUT|POST' requests.txt
+  options: ["2", "0", "3"]
+  answer: 2
+  explanation: >-
+    | splits the whole pattern in two: ^PUT, or POST anywhere in the line.
+    POST /login and GET /blog/POST hold POST, and PUT /files/a.txt starts
+    with PUT, so three lines match. "2" applies the ^ to both alternatives;
+    that needs parentheses, ^(PUT|POST). "0" reads | as a plain character,
+    as grep does without -E.
+
+- id: q6
+  objective: 4
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "/Admin" > paths.txt
+    echo "/index.html" >> paths.txt
+    echo "/ADMIN/users" >> paths.txt
+    echo "/about" >> paths.txt
+    echo "/admin" >> paths.txt
+    grep -v -i -c '/admin' paths.txt
+  options: ["3", "2", "4"]
+  answer: 1
+  explanation: >-
+    -v keeps the lines that don't match, and -c counts them instead of
+    printing them. With -i, /admin matches /Admin, /ADMIN/users and /admin,
+    so two lines are left: /index.html and /about. "3" counts the lines that
+    match, as if -v weren't there. "4" ignores -i: then only the lowercase
+    /admin would be left out.
+
+- id: q7
+  objective: 3
+  type: spot-the-bug
+  prompt: >-
+    This command should print the requests in access.log whose path ends in
+    .png or .jpg. It also prints requests for /logo.png.bak and /photos/jpg.
+    Which command fixes it?
+  code: |
+    grep -E '\.png|jpg ' access.log
+  options:
+    - |-
+      grep -E '\.(png|jpg) ' access.log
+    - |-
+      grep -E '(\.png|jpg) ' access.log
+    - |-
+      grep '\.(png|jpg) ' access.log
+  answer: 0
+  explanation: >-
+    | splits the whole pattern in two: \.png anywhere in the line, or jpg
+    followed by a space. /logo.png.bak matches the first, /photos/jpg the
+    second. In \.(png|jpg) the group holds only the alternatives, so the
+    dot comes before both and the space after both. (\.png|jpg) puts the
+    space after both but leaves the dot out of the jpg alternative, so
+    /photos/jpg still matches. Without -E, ( ) and | are plain characters:
+    grep looks for the text (png|jpg) and finds nothing.
