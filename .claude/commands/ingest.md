@@ -29,6 +29,10 @@ format is in `spec/README.md` ("Sources").
      main content in `sources/raw/<id>.html`, suggest a `selector` for it,
      and after the author's OK add it to the source in `brief.yaml`. Then run
      ingest again for that source only.
+   - Unwanted parts inside the main content (breadcrumbs, ads, a page's own
+     table of contents): suggest CSS selectors for them and, after the
+     author's OK, add them as `exclude` to the source in `brief.yaml`. Then
+     run ingest again for that source only.
    - A source that fails to download or convert: show the error. Suggest
      another URL or a local file only if the author has one.
    - `license unknown`: ask the author what the source allows and add
