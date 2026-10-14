@@ -63,6 +63,14 @@ def test_html_selector_that_matches_nothing():
         html.convert(PAGE, selector="#missing")
 
 
+def test_html_exclude():
+    page = ("<body><main><div class='crumbs'>Home</div><h2>Kept</h2>"
+            "<div class='ad'>Buy now</div><p>Text</p></main></body>")
+    converted = html.convert(page, exclude=[".crumbs", ".ad", ".missing"])
+    assert converted.markdown == "## Kept {#kept}\n\nText\n"
+    assert converted.warnings == ["exclude '.missing' matches nothing on the page"]
+
+
 def test_html_without_a_main_element_warns():
     converted = html.convert("<body><h2>Title</h2><p>Text</p></body>")
     assert "used the whole page" in converted.warnings[0]

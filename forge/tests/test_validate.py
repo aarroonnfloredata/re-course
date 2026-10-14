@@ -30,7 +30,8 @@ def test_static_problems(course):
     variant = module / "broken/slugify-keeps-case/exercise/text_tools.py"
     edit(variant, "# Broken variant: ", "# ")
     edit(course / "brief.yaml", "    url: https://docs.python.org/3/library/stdtypes.html",
-         "    url: https://docs.python.org/3/library/stdtypes.html\n    restricted: sometimes")
+         "    url: https://docs.python.org/3/library/stdtypes.html\n    restricted: sometimes\n"
+         "    exclude: .ad")
 
     problems = validate(course, execute=False).problems
     assert_found(
@@ -50,6 +51,7 @@ def test_static_problems(course):
         "no point for objective 1",
         "slugify-keeps-case/exercise/text_tools.py: the first line must be",
         "sources/1: restricted must be true or false",
+        "sources/1: exclude must be a list of CSS selectors",
     )
 
 
