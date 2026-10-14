@@ -1,0 +1,22 @@
+id: 11-functions-and-safer-scripts
+title: Functions and Safer Scripts
+exercise_type: implement
+language: bash
+prerequisites:
+- 10-find-and-xargs
+objectives:
+- Define functions that take arguments and keep their variables local
+- Give results back from a function through its output and its return status
+- Load functions from another file with source
+- Make a script stop on errors with set -euo pipefail, and know the cases set -e misses
+sources:
+- bashguide-compound#Functions-1
+- tlcl#shell-functions
+- tlcl#local-variables
+- tlcl#using-positional-parameters-with-shell-functions
+- bashguide-sourcing#Sourcing
+- tlcl#set-e-set-u-and-set-o-pipefail
+- bashpitfalls#errexit
+- bashpitfalls#pipefail
+- bashpitfalls#nounset
+- bashpitfalls#local_var.3D.24.28cmd.29

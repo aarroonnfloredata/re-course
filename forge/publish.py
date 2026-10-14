@@ -1,10 +1,12 @@
 """Publish a course: replace shared-workspace/<course>/ with its learner files.
 
     uv run python -m forge.publish <course> [--accept-unknown-licenses]
+                                           [--accept-restricted-licenses]
 
 1. The full validator must pass (so every module is built).
-2. Sources with an unknown licence that a module cites need the author's
-   confirmation: --accept-unknown-licenses.
+2. Sources that a module cites need the author's confirmation when their
+   licence is unknown (--accept-unknown-licenses) or marked `restricted`
+   (--accept-restricted-licenses).
 3. shared-workspace/<course>/ is deleted and the learner files are copied in.
 4. Smoke check: no authoring files in the copy, and `learn next` runs there.
 5. The course's trial folder is removed.
@@ -41,10 +43,12 @@ class Published:
     target: Path
     modules: list[str]
     unknown_licenses: dict = field(default_factory=dict)  # source ID -> citing modules
+    restricted_licenses: dict = field(default_factory=dict)  # source ID -> citing modules
     removed_trial: bool = False
 
 
-def publish(course_dir, accept_unknown_licenses=False, shared_dir=None):
+def publish(course_dir, accept_unknown_licenses=False, accept_restricted_licenses=False,
+            shared_dir=None):
     course_dir = Path(course_dir)
     shared_dir = Path(shared_dir) if shared_dir else ROOT / "shared-workspace"
 
@@ -52,12 +56,20 @@ def publish(course_dir, accept_unknown_licenses=False, shared_dir=None):
     if report.problems:
         raise PublishError("the validator found problems:\n" + "\n".join(report.problems))
     course = yaml.safe_load((course_dir / "course.yaml").read_text(encoding="utf-8"))
-    unknown = unknown_licenses(course_dir, course["modules"])
+    cited = cited_sources(course_dir, course["modules"])
+    unknown = {source: modules for source, (front, modules) in cited.items()
+               if unknown_license(front)}
+    restricted = {source: modules for source, (front, modules) in cited.items()
+                  if front.get("restricted") is True}
+    refusals = []
     if unknown and not accept_unknown_licenses:
-        listed = "\n".join(f"{source} (cited by {', '.join(modules)})"
-                           for source, modules in unknown.items())
-        raise PublishError("these sources have an unknown licence; confirm with "
-                           f"--accept-unknown-licenses:\n{listed}")
+        refusals.append("these sources have an unknown licence; confirm with "
+                        f"--accept-unknown-licenses:\n{listing(unknown)}")
+    if restricted and not accept_restricted_licenses:
+        refusals.append("these sources have a restricted licence; confirm with "
+                        f"--accept-restricted-licenses:\n{listing(restricted)}")
+    if refusals:
+        raise PublishError("\n".join(refusals))
 
     target = shared_dir / course_dir.name
     if target.exists():
@@ -65,24 +77,34 @@ def publish(course_dir, accept_unknown_licenses=False, shared_dir=None):
     trial.copy_learner_files(course_dir, target)
     smoke_check(target)
     removed = trial.remove(course_dir)
-    return Published(target, course["modules"], unknown, removed)
+    return Published(target, course["modules"], unknown, restricted, removed)
 
 
-def unknown_licenses(course_dir, module_ids):
-    """Sources cited by the course's modules whose licence is missing or unknown."""
+def cited_sources(course_dir, module_ids):
+    """Each source cited by the course's modules: source ID -> (its front
+    matter, the modules citing it)."""
     cited = {}
     for module_id in module_ids:
         module = yaml.safe_load((course_dir / "modules" / module_id / "module.yaml").read_text())
         for citation in module["sources"]:
             cited.setdefault(citation.split("#", 1)[0], []).append(module_id)
-    unknown = {}
+    found = {}
     for source_id, modules in sorted(cited.items()):
         text = (course_dir / "sources" / f"{source_id}.md").read_text(encoding="utf-8")
         front = re.match(r"---\n(.*?)\n---\n", text, re.S)
-        license_text = str((yaml.safe_load(front.group(1)) or {}).get("license") or "") if front else ""
-        if not license_text or license_text.lower().startswith("unknown"):
-            unknown[source_id] = sorted(set(modules))
-    return unknown
+        found[source_id] = ((yaml.safe_load(front.group(1)) or {}) if front else {},
+                            sorted(set(modules)))
+    return found
+
+
+def unknown_license(front):
+    """The licence in a source's front matter is missing or unknown."""
+    license_text = str(front.get("license") or "")
+    return not license_text or license_text.lower().startswith("unknown")
+
+
+def listing(sources):
+    return "\n".join(f"{source} (cited by {', '.join(modules)})" for source, modules in sources.items())
 
 
 def smoke_check(target):
@@ -109,18 +131,23 @@ def main(argv=None):
     parser.add_argument("course", help="the course folder, e.g. workspace/bash-basics")
     parser.add_argument("--accept-unknown-licenses", action="store_true",
                         help="publish even though some cited sources have an unknown licence")
+    parser.add_argument("--accept-restricted-licenses", action="store_true",
+                        help="publish even though some cited sources have a restricted licence")
     args = parser.parse_args(argv)
     if not (Path(args.course) / "course.yaml").is_file():
         print(f"forge.publish: no course.yaml in {args.course}", file=sys.stderr)
         return 2
     try:
-        published = publish(args.course, args.accept_unknown_licenses)
+        published = publish(args.course, args.accept_unknown_licenses,
+                            args.accept_restricted_licenses)
     except PublishError as error:
         print(f"forge.publish: {error}", file=sys.stderr)
         return 1
     print(f"Published {len(published.modules)} module(s) to {published.target}/.")
     for source, modules in published.unknown_licenses.items():
         print(f"  licence unknown, accepted: {source} (cited by {', '.join(modules)})")
+    for source, modules in published.restricted_licenses.items():
+        print(f"  licence restricted, accepted: {source} (cited by {', '.join(modules)})")
     if published.removed_trial:
         print(f"  removed {trial.trial_dir(args.course)}/")
     return 0

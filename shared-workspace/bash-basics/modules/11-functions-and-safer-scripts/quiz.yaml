@@ -1,0 +1,201 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    file="report.txt"
+    save() {
+        file="$1.bak"
+        echo "saving $file"
+    }
+    save access.log
+    echo "file: $file"
+  options:
+    - |-
+      saving access.log.bak
+      file: report.txt
+    - |-
+      saving access.log.bak
+      file: access.log.bak
+    - |-
+      saving .bak
+      file: .bak
+  answer: 1
+  explanation: >-
+    Variables set in a function are global unless the function declares
+    them with local, so save() overwrites the caller's file. With
+    local file="$1.bak" the last line would print report.txt, as a Python
+    function's variables would. Inside the function, $1 is the function's
+    own first argument, access.log, not the script's, which is why it
+    isn't empty.
+
+- id: q2
+  objective: 2
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "2026-10-06T10:17:03 198.51.100.7 POST /upload 500 0" > access.log
+    count_500() {
+        local n
+        n=$(grep -c " 500 " access.log)
+        return "$n"
+    }
+    total=$(count_500)
+    echo "total: [$total], status: $?"
+  options:
+    - "total: [1], status: 0"
+    - "total: [1], status: 1"
+    - "total: [], status: 0"
+    - "total: [], status: 1"
+  answer: 3
+  explanation: >-
+    return sets only the exit status, here 1, the number of 500 requests.
+    $( ) captures what the function prints, and it prints nothing, so total
+    is empty. The assignment takes the function's status, so $? is 1, which
+    reads as a failure although a 500 request was found. Print values with
+    echo and keep the status for whether the function worked.
+
+- id: q3
+  objective: 2
+  type: spot-the-bug
+  prompt: >-
+    This script should print the number of 500 requests in each log, and
+    report a missing log on stderr and go on with the next one. But it stops
+    at missing.log, and monday.log is never counted. Which change fixes it?
+  code: |
+    check_log() {
+        if [[ ! -f $1 ]]; then
+            echo "no such file: $1" >&2
+            exit 1
+        fi
+        grep -c " 500 " "$1"
+    }
+    for logfile in access.log missing.log monday.log; do
+        check_log "$logfile"
+    done
+  options:
+    - "Replace exit 1 with exit 0"
+    - "Call it as check_log \"$logfile\" || echo \"skipped\""
+    - "Replace exit 1 with return 1"
+    - "Add local logfile at the start of check_log"
+  answer: 2
+  explanation: >-
+    exit ends the whole script, also when it runs inside a function, so the
+    loop never reaches monday.log. return 1 ends only the function, with
+    status 1, and the loop goes on. exit 0 still ends the script, just with
+    a success status. A || after the call can't help, because the script has
+    already ended when check_log would return. local logfile changes nothing
+    here: the function never sets logfile.
+
+- id: q4
+  objective: 3
+  type: spot-the-bug
+  prompt: >-
+    logkit.sh loads its library with the line below. It works when run as
+    bash logkit.sh from inside exercise/, but run from the module folder as
+    bash exercise/logkit.sh, it stops with "./loglib.sh: No such file or
+    directory". Which line fixes it?
+  code: |
+    source ./loglib.sh
+  options:
+    - 'source "$0/loglib.sh"'
+    - 'bash "$(dirname "$0")/loglib.sh"'
+    - 'source "$(dirname "$0")/loglib.sh"'
+    - 'source loglib.sh'
+  answer: 2
+  explanation: >-
+    ./loglib.sh means loglib.sh in the current folder, wherever the script
+    is. $0 holds the script's path as it was run, exercise/logkit.sh, and
+    dirname turns that into its folder, exercise, so the fixed line finds
+    loglib.sh next to the script from any folder. "$0/loglib.sh" is
+    exercise/logkit.sh/loglib.sh, which doesn't exist. bash runs the
+    library as a separate program, so its functions are gone when it ends.
+    loglib.sh without ./ still isn't looked for in the script's folder.
+
+- id: q5
+  objective: 4
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    set -e
+    echo "2026-10-06T10:15:32 203.0.113.5 GET /index.html 200 512" > access.log
+    count_500() {
+        local n=$(grep -c " 500 " access.log)
+        echo "500 requests: $n"
+    }
+    count_500
+    echo "done"
+  options:
+    - |-
+      500 requests: 0
+      done
+    - "500 requests: \ndone"
+    - "(nothing)"
+  answer: 0
+  explanation: >-
+    grep -c finds no 500 request, prints 0 and fails. Its output still
+    lands in n, so n is 0, not empty. set -e sees only the status of the
+    whole command, local n=$(...), and local succeeds, so the script goes
+    on to the end. Written as two commands, local n and
+    then n=$(grep -c " 500 " access.log), the assignment would fail with
+    grep's status and set -e would stop the script before printing
+    anything.
+
+- id: q6
+  objective: 4
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    set -e
+    cleanup() {
+        grep -q " 500 " missing.log 2> /dev/null
+        echo "cleanup went on"
+    }
+    cleanup || echo "cleanup failed"
+    echo "end"
+  options:
+    - |-
+      cleanup failed
+      end
+    - |-
+      cleanup went on
+      end
+    - "(nothing)"
+    - |-
+      cleanup went on
+      cleanup failed
+      end
+  answer: 1
+  explanation: >-
+    cleanup is tested by ||, so set -e ignores failures of every command
+    inside it: grep fails on the missing file, and the function goes on to
+    its echo. The function's status is that of echo, 0, so "cleanup failed"
+    is never printed. Called on its own line, without ||, cleanup would stop
+    the script at grep and print nothing.
+
+- id: q7
+  objective: 4
+  type: spot-the-bug
+  prompt: >-
+    This script should stop, without printing anything, when access.log is
+    missing. Instead it prints "total: 0 bytes". Which change fixes it?
+  code: |
+    set -eu
+    total=$(cut -d ' ' -f 6 access.log | awk '{ sum += $1 } END { print sum + 0 }')
+    echo "total: $total bytes"
+  options:
+    - "Replace set -eu with set -o pipefail"
+    - "Keep set -eu and add || exit 1 after the assignment"
+    - "Replace set -eu with set -euo pipefail"
+  answer: 2
+  explanation: >-
+    cut fails on the missing file, but a pipeline's status is its last
+    command's, and awk succeeds, printing 0. With pipefail, cut's failure
+    makes the pipeline, and so the assignment, fail, and set -e then stops
+    the script before echo. pipefail alone makes the assignment fail, but
+    without set -e the script carries on and still prints the line. || exit
+    1 runs only when the assignment fails, and without pipefail it
+    succeeds, with awk's status.

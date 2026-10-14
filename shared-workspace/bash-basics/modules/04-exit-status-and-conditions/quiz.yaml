@@ -1,0 +1,177 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: predict-output
+  prompt: >-
+    The first two lines write found.sh, a script that ends with exit and no
+    number. What does the last line print?
+  code: |
+    echo 'grep -q " 404 " "$1"' > found.sh
+    echo 'exit' >> found.sh
+    echo "2026-10-06T10:15:40 198.51.100.7 GET /missing.html 404 153" > busy.log
+    echo "2026-10-06T10:15:32 203.0.113.5 GET /index.html 200 512" > quiet.log
+    bash found.sh busy.log
+    first=$?
+    bash found.sh quiet.log
+    echo "busy: $first, quiet: $?"
+  options:
+    - "busy: 0, quiet: 0"
+    - "busy: 1, quiet: 0"
+    - "busy: 0, quiet: 1"
+  answer: 2
+  explanation: >-
+    exit without a number ends the script with the status of the last
+    command, here grep -q. grep succeeds, with 0, on busy.log, which holds a
+    404 request, and fails, with 1, on quiet.log. "busy: 0, quiet: 0" takes a
+    bare exit to mean success. "busy: 1, quiet: 0" reads the statuses the
+    Python way, with 1 as true; in bash, 0 is success.
+
+- id: q2
+  objective: 1
+  type: spot-the-bug
+  prompt: >-
+    This script should print grep's count and status, then exit with that
+    same status. For a log without 404 requests it prints "grep exited with
+    1", but it exits with 0. Which change fixes it?
+  code: |
+    grep -c " 404 " "$1"
+    echo "grep exited with $?"
+    exit $?
+  options:
+    - "Move the line exit $? above the echo line"
+    - "Add grep_status=$? right after the grep line, and use $grep_status in the echo and exit lines"
+    - 'Write the last line as exit "$?", with double quotes'
+  answer: 1
+  explanation: >-
+    $? holds the status of the last command. In the echo line that is still
+    grep, but by the exit line echo has run and succeeded, so $? is 0.
+    Saving the status in a variable straight after grep keeps it. Moving
+    exit above echo does exit with grep's status, but exit ends the script
+    at once, so the message is never printed. Quotes don't change the value:
+    $? is already 0 there.
+
+- id: q3
+  objective: 2
+  type: predict-output
+  prompt: What does the last line print?
+  code: |
+    echo "2026-10-06T10:15:40 198.51.100.7 GET /missing.html 404 153" > access.log
+    result=none
+    grep -q " 404 " access.log && result=found
+    grep -q " 500 " access.log || result="$result, no 500"
+    echo "$result"
+  options:
+    - "found, no 500"
+    - "none"
+    - "none, no 500"
+    - "found"
+  answer: 0
+  explanation: >-
+    access.log holds a 404 request, so the first grep succeeds and && runs
+    result=found. It holds no 500 request, so the second grep fails and ||
+    runs, adding ", no 500". "none" reads the statuses the Python way, with
+    0 as false: then neither && nor || would run its command. "found"
+    forgets that || runs when the command before it fails, and
+    "none, no 500" that && runs when it succeeds.
+
+- id: q4
+  objective: 3
+  type: spot-the-bug
+  prompt: >-
+    This should print a line only when the log file named by $1 holds a
+    request with status 500, but [ prints "too many arguments" instead.
+    Which first line fixes it?
+  code: |
+    if [ grep -q " 500 " "$1" ]; then
+        echo "$1 has 500 requests"
+    fi
+  options:
+    - 'if [[ grep -q " 500 " "$1" ]]; then'
+    - "if [ \"grep -q ' 500 ' $1\" ]; then"
+    - 'if grep -q " 500 " "$1"; then'
+  answer: 2
+  explanation: >-
+    if takes a command and branches on its exit status, and grep is a
+    command: if grep -q " 500 " "$1"; then is the whole syntax. [ is not
+    part of if but a command of its own, so here it gets grep, -q and the
+    rest as its arguments, which make no test. [[ ]] doesn't run commands
+    either; bash rejects that line as a syntax error. In double quotes, [
+    gets one non-empty text, which is always true, so the line would be
+    printed for every log.
+
+- id: q5
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "2026-10-06T10:15:32 203.0.113.5 GET /index.html 200 512" > access.log
+    echo "2026-10-06T10:16:20 192.0.2.44 GET /api/stats 503 0" >> access.log
+    if grep " 5[0-9][0-9] " access.log; then
+        echo "server errors"
+    fi
+  options:
+    - "server errors"
+    - |-
+      2026-10-06T10:16:20 192.0.2.44 GET /api/stats 503 0
+      server errors
+    - "2026-10-06T10:16:20 192.0.2.44 GET /api/stats 503 0"
+  answer: 1
+  explanation: >-
+    if runs grep as an ordinary command, so grep prints the line it finds,
+    as it always does. Its status is 0, so if then runs the then part and
+    "server errors" follows. Only "server errors" would need grep -q, which
+    prints nothing. Only the line would mean the then part didn't run, but
+    if looks at grep's status, not at what grep printed.
+
+- id: q6
+  objective: 4
+  type: predict-output
+  prompt: What does the last line print?
+  code: |
+    count=100
+    limit=25
+    as_number=no
+    as_text=no
+    [[ $count -lt $limit ]] && as_number=yes
+    [[ $count < $limit ]] && as_text=yes
+    echo "-lt: $as_number, <: $as_text"
+  options:
+    - "-lt: no, <: no"
+    - "-lt: yes, <: no"
+    - "-lt: yes, <: yes"
+    - "-lt: no, <: yes"
+  answer: 3
+  explanation: >-
+    -lt compares numbers: 100 is not less than 25, so as_number stays no.
+    < compares strings by sort order, character by character, and "1" sorts
+    before "2", so "100" comes before "25" and as_text becomes yes. The
+    answers with "<: no" treat < as a number comparison, and "-lt: yes,
+    <: yes" takes both as text. Inside [[ ]], < is not a redirection: it
+    compares text.
+
+- id: q7
+  objective: 4
+  type: spot-the-bug
+  prompt: >-
+    This should print a line only when $name is exactly the text in
+    $wanted, but it prints "access.log is the name *.log". Which first line
+    of the if fixes it?
+  code: |
+    wanted="*.log"
+    name="access.log"
+    if [[ $name = $wanted ]]; then
+        echo "$name is the name $wanted"
+    fi
+  options:
+    - 'if [[ $name = "$wanted" ]]; then'
+    - 'if [[ "$name" = $wanted ]]; then'
+    - 'if [[ $name == $wanted ]]; then'
+  answer: 0
+  explanation: >-
+    In [[ ]], an unquoted right side of = is a glob pattern, and access.log
+    matches *.log. Quoting the right side compares plain text. Quoting the
+    left side changes nothing: [[ ]] doesn't split or glob it anyway, and
+    the right side is still a pattern. == is not Python's exact comparison:
+    in [[ ]] it works like =, so the unquoted $wanted is still a pattern.

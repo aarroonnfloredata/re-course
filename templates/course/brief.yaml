@@ -19,6 +19,7 @@ sources:
   - id: TODO  # short ID used in citations, e.g. pytutorial
     url: TODO  # or `path:` to a local file, relative to this folder
     # license: "..."  # optional: what the source allows; checked before publishing
+    # restricted: true  # optional: the licence limits sharing material built from it
     # selector: "..."  # optional, HTML only: CSS selector for the main content
 
 project_style: cumulative  # or: independent (see spec/exercises.md)

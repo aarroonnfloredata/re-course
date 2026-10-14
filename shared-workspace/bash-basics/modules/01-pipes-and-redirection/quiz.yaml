@@ -1,0 +1,149 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: predict-output
+  prompt: >-
+    The first three lines write a script, demo.sh. What does running it with
+    bash print?
+  code: |
+    echo '#!/usr/bin/env bash' > demo.sh
+    echo '# A comment line.' >> demo.sh
+    echo 'echo GET#1 # first request' >> demo.sh
+    bash demo.sh
+  options:
+    - "GET#1 # first request"
+    - "GET"
+    - "GET#1"
+  answer: 2
+  explanation: >-
+    A # starts a comment only at the start of a word. The # in GET#1 is
+    inside the word, so it gets printed; the # after the space starts a new
+    word and a comment, so "# first request" does not. "GET" treats every # as a comment, and "GET#1 # first request"
+    treats none of them as one. The #! line and the comment line print
+    nothing.
+
+- id: q2
+  objective: 2
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "GET /index.html 200" > requests.txt
+    echo "GET /missing.html 404" > requests.txt
+    echo "POST /login 401" >> requests.txt
+    head -n 1 requests.txt
+  options:
+    - "GET /index.html 200"
+    - "GET /missing.html 404"
+    - "POST /login 401"
+  answer: 1
+  explanation: >-
+    > empties the file before writing, so the second line replaced
+    "GET /index.html 200". >> adds to the end, so "POST /login 401" became
+    the second line, and head -n 1 prints the first. "GET /index.html 200"
+    assumes > adds to the file; "POST /login 401" assumes >> replaces it.
+
+- id: q3
+  objective: 3
+  type: predict-output
+  prompt: >-
+    The first two lines write a script, count.sh, that prints one line to
+    stdout and one to stderr. What does the last line, cat report.txt, print?
+  code: |
+    echo 'echo 3 requests' > count.sh
+    echo 'echo logkit: 1 line skipped >&2' >> count.sh
+    bash count.sh > report.txt
+    cat report.txt
+  options:
+    - "3 requests\nlogkit: 1 line skipped"
+    - "3 requests"
+    - "logkit: 1 line skipped"
+  answer: 1
+  explanation: >-
+    > redirects stdout only. The message sent with >&2 goes to stderr, which
+    still points to the screen, so it shows up when count.sh runs and never
+    reaches report.txt. To catch it in a file you need 2> as well. "logkit: 1
+    line skipped" alone would mean > caught stderr instead of stdout, the
+    other way round.
+
+- id: q4
+  objective: 3
+  type: spot-the-bug
+  prompt: >-
+    This line should save both the output and the error messages of count.sh
+    in all.txt, but the error messages still appear on the screen. Which line
+    fixes it?
+  code: |
+    bash count.sh 2>&1 > all.txt
+  options:
+    - "bash count.sh 2>&1 >> all.txt"
+    - "bash count.sh 2>&1 | all.txt"
+    - "bash count.sh > all.txt 2>&1"
+  answer: 2
+  explanation: >-
+    Bash handles redirections from left to right. 2>&1 points stderr to
+    wherever stdout points at that moment, so stdout must go to all.txt
+    first. Changing > to >> keeps the wrong order, and | sends the output to
+    a command called all.txt instead of a file.
+
+- id: q5
+  objective: 4
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "2026-10-06T10:15:32 203.0.113.5 GET /index.html 200 512" > access.log
+    echo "2026-10-06T10:15:40 198.51.100.7 GET /missing.html 404 153" >> access.log
+    echo "2026-10-06T10:16:15 192.0.2.44 GET /about.html 200 404" >> access.log
+    echo "2026-10-06T10:16:48 192.0.2.44 GET /errors/404.html 200 1024" >> access.log
+    grep -c 404 access.log
+  options: ["3", "1", "2"]
+  answer: 0
+  explanation: >-
+    grep matches the pattern anywhere in a line, even inside a longer word,
+    so 404 matches the status of the second request, the bytes of the third
+    and the path /errors/404.html of the fourth. "1" counts only the status
+    and "2" misses the 404 inside the path. Only the second request has
+    status 404; grep -c " 404 ", with a space on each side, counts just
+    that one.
+
+- id: q6
+  objective: 4
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "GET /a.html 200" > requests.txt
+    echo "POST /login 401" >> requests.txt
+    echo "GET /b.html 404" >> requests.txt
+    echo "GET /c.html 200" >> requests.txt
+    grep GET requests.txt | head -n 2 | tail -n 1
+  options:
+    - "POST /login 401"
+    - "GET /b.html 404"
+    - "GET /c.html 200"
+  answer: 1
+  explanation: >-
+    Each | feeds one command's output to the next, not the original file.
+    grep keeps the three GET lines, head -n 2 keeps the first two of those
+    (/a.html and /b.html), and tail -n 1 keeps the last of those.
+    "POST /login 401" is what head and tail give on the whole file, as if
+    grep's output were not passed on. "GET /c.html 200" skips the head and
+    takes the last GET line.
+
+- id: q7
+  objective: 3
+  type: multiple-choice
+  prompt: >-
+    missing.log doesn't exist. What appears on the screen when you run this?
+  code: |
+    grep POST missing.log > /dev/null
+  options:
+    - "grep's error message about missing.log"
+    - "Nothing: > /dev/null throws away everything grep prints"
+    - "Nothing: the error message is kept in the file /dev/null"
+  answer: 0
+  explanation: >-
+    > redirects stdout only, and grep reports a missing file on stderr, which
+    still points to the screen. To throw the error away, write 2> /dev/null.
+    /dev/null discards what it receives, so there is nothing to read back
+    from it later either.

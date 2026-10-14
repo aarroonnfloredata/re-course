@@ -1,0 +1,15 @@
+title: "Bash Basics"
+spec_version: 1
+language: "bash"
+modules:  # module IDs in learning order; from outline.yaml
+  - 01-pipes-and-redirection
+  - 02-variables-and-arguments
+  - 03-quoting-and-word-splitting
+  - 04-exit-status-and-conditions
+  - 05-loops-and-case
+  - 06-cut-sort-uniq
+  - 07-regular-expressions
+  - 08-sed
+  - 09-awk
+  - 10-find-and-xargs
+  - 11-functions-and-safer-scripts

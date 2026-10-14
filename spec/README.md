@@ -77,6 +77,7 @@ sources:
   - id: pytutorial          # source ID used in citations
     url: https://docs.python.org/3/tutorial/introduction.html
     license: "PSF License Version 2"   # optional
+    restricted: false                  # optional
     selector: "div.body"               # optional; HTML pages only
 project_style: independent  # or: cumulative (the template's default)
 dependencies: []            # packages the course needs, e.g. ["polars>=1.0"]
@@ -91,6 +92,9 @@ Optional per source:
 
 - `license`: what the source allows. Copied into the ingested file; without
   it, ingest writes "unknown: check before publishing".
+- `restricted`: `true` when the licence limits sharing material built from
+  the source, e.g. no derivative works. Copied into the ingested file;
+  `/publish` then needs the author's separate confirmation.
 - `selector`: a CSS selector for the page's main content, for when ingest's
   automatic choice picks up menus or footers.
 
@@ -223,7 +227,8 @@ license: PSF License Version 2
 ...
 ```
 
-- Ingest writes `id`, `title`, `url` or `path`, `retrieved` and `license`.
+- Ingest writes `id`, `title`, `url` or `path`, `retrieved` and `license`,
+  and `restricted: true` when the brief sets it.
   A hand-made file may add `version`, and `excerpt` when it holds only part
   of the source; omitted text is then marked `[…]`.
 - Every section that can be cited has a heading ending in `{#<section-id>}`.

@@ -1,0 +1,27 @@
+id: 03-quoting-and-word-splitting
+title: Quoting, Word Splitting and Globs
+exercise_type: implement
+language: bash
+prerequisites:
+- 02-variables-and-arguments
+objectives:
+- Predict how bash splits an unquoted expansion into words and expands globs in it
+- Quote expansions with double quotes so values with spaces stay one argument
+- Stop $ and other special characters with single quotes and backslashes
+- Match file names with *, ? and [...], keeping the glob outside the quotes
+- Pass the remaining arguments on unchanged with shift and "$@"
+sources:
+- bashguide-commands#Commands_and_Arguments
+- bashguide-special-characters#Special_characters
+- bashguide-practices#Quoting
+- tlcl#quoting
+- tlcl#double-quotes
+- tlcl#single-quotes
+- tlcl#escaping-characters
+- tlcl#pathname-expansion
+- bashguide-patterns#Glob_Patterns-1
+- tlcl#shift-getting-access-to-many-arguments
+- tlcl#handling-positional-parameters-en-masse
+- bashpitfalls#cp_.24file_.24target
+- bashpitfalls#echo_.24foo
+- bashpitfalls#for_arg_in_.24.2A

@@ -1,0 +1,149 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    day=2026-10-06
+    echo "$day_access.log"
+  options:
+    - "2026-10-06_access.log"
+    - "$day_access.log"
+    - ".log"
+  answer: 2
+  explanation: >-
+    After a $, bash reads letters, digits and underscores as part of the
+    name, so $day_access is a variable called day_access. It was never
+    assigned, so it expands to nothing and only ".log" is left; the . can't
+    be part of a name, so it ends the name. "2026-10-06_access.log" needs
+    braces: ${day}_access.log. "$day_access.log" would mean no expansion
+    happens inside double quotes, but it does.
+
+- id: q2
+  objective: 1
+  type: spot-the-bug
+  prompt: >-
+    This script should count the 404 requests in access.log. Instead, its
+    first line fails with "status: command not found", and grep counts the
+    wrong lines. Which first line fixes it?
+  code: |
+    status = 404
+    grep -c " $status " access.log
+  options:
+    - "$status=404"
+    - "status=404"
+    - 'status = "404"'
+  answer: 1
+  explanation: >-
+    With spaces around =, bash splits the line into three words and runs the
+    first, status, as a command with = and 404 as its arguments. status is
+    never assigned, so grep looks for two spaces. An assignment has no
+    spaces around = and no $ in front of the name: $status=404 expands the
+    empty $status and runs =404 as a command. Quoting 404 keeps the spaces,
+    so it is still a command.
+
+- id: q3
+  objective: 1
+  type: predict-output
+  prompt: What does the echo line print?
+  code: |
+    title=logkit report
+    echo "[$title]"
+  options:
+    - "[]"
+    - "[logkit report]"
+    - "[logkit]"
+  answer: 0
+  explanation: >-
+    Without quotes, the space ends the assignment. Bash reads title=logkit as
+    an assignment, runs the next word, report, as a command, and the
+    variable doesn't keep the value. There is no command called report, so
+    that line fails, and title is still empty when echo runs.
+    "[logkit report]" needs quotes around the value: title="logkit report".
+    "[logkit]" assumes bash keeps the first word and ignores the rest.
+
+- id: q4
+  objective: 2
+  type: predict-output
+  prompt: >-
+    The first line writes a one-line script, args.sh. What does running it
+    print?
+  code: |
+    echo 'echo "$2 $1 ($# arguments)"' > args.sh
+    bash args.sh access.log 404 GET
+  options:
+    - "access.log 404 (3 arguments)"
+    - "404 access.log (4 arguments)"
+    - "404 access.log (3 arguments)"
+  answer: 2
+  explanation: >-
+    $1 is the first argument after the script's name, access.log, and $2 the
+    second, 404; the script prints them in the order it names them, $2
+    first. $# counts the arguments, not the script's name, so it is 3, not
+    4 as len(sys.argv) would be in Python. GET is counted even though the
+    script never prints it.
+
+- id: q5
+  objective: 2
+  type: predict-output
+  prompt: >-
+    The first line writes a one-line script, show.sh. What does running it
+    with only one argument print?
+  code: |
+    echo 'echo "$# arguments, status: [$2]"' > show.sh
+    bash show.sh access.log
+  options:
+    - "1 arguments, status: []"
+    - "2 arguments, status: []"
+    - "an error: show.sh got no second argument"
+  answer: 0
+  explanation: >-
+    An argument that wasn't given expands to nothing, like any variable that
+    was never assigned, so there is no error and the brackets are empty. $#
+    is 1: the script's name is not one of its arguments.
+
+- id: q6
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "GET /a.html 200" > requests.txt
+    echo "POST /login 401" >> requests.txt
+    echo "GET /b.html 404" >> requests.txt
+    gets=$(grep -c GET requests.txt)
+    echo "[$gets] GET requests"
+  options:
+    - "2\n[2] GET requests"
+    - "[2] GET requests"
+    - "[2\n] GET requests"
+  answer: 1
+  explanation: >-
+    $( ) replaces itself with the command's output, so grep's 2 goes into
+    the variable instead of to the screen; only echo prints. The newline
+    grep printed after the 2 is dropped, so the closing bracket stays on the
+    same line. Keeping it would be like Python's subprocess output, which
+    ends with "\n".
+
+- id: q7
+  objective: 3
+  type: spot-the-bug
+  prompt: >-
+    This script should print how many 404 requests access.log holds.
+    Instead, its first line fails with an error and the second prints
+    " requests with status 404". Which first line fixes it?
+  code: |
+    count=grep -c " 404 " access.log
+    echo "$count requests with status 404"
+  options:
+    - 'count=$(grep -c " 404 " access.log)'
+    - 'count = $(grep -c " 404 " access.log)'
+    - '$count=$(grep -c " 404 " access.log)'
+  answer: 0
+  explanation: >-
+    To store a command's output, wrap the command in $( ). Without it, bash
+    reads count=grep as an assignment and runs the next word, -c, as a
+    command, which doesn't exist; grep never runs and count gets no number.
+    With spaces around =, count itself becomes a command; with a $ in front,
+    $count is expanded (to nothing) instead of assigned.

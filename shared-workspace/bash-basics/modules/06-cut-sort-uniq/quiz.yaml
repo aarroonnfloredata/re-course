@@ -1,0 +1,162 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "2026-10-06T10:16:02 203.0.113.5 POST /login 401 64" > access.log
+    cut -d ' ' -f 5,2 access.log
+  options:
+    - "401 203.0.113.5"
+    - "203.0.113.5 401"
+    - "203.0.113.5 POST /login 401"
+  answer: 1
+  explanation: >-
+    cut prints the fields in the order they have in the line, whatever the
+    order after -f, so -f 5,2 prints the same as -f 2,5: the IP, then the
+    status. "401 203.0.113.5" expects cut to follow the order of the list;
+    to swap fields, read them with while read -r and print them in the
+    order you want. "203.0.113.5 POST /login 401" reads 5,2 as the range
+    from field 2 to field 5, which is written 2-5.
+
+- id: q2
+  objective: 1
+  type: spot-the-bug
+  prompt: >-
+    This command should print the client IP of every request in access.log,
+    whose fields are separated by single spaces. Instead it prints every line
+    whole. Which command fixes it?
+  code: |
+    cut -f 2 access.log
+  options:
+    - "cut -c 2 access.log"
+    - "cut -d ' ' -f 1 access.log"
+    - "cut -d ' ' -f 2 access.log"
+  answer: 2
+  explanation: >-
+    Without -d, cut expects fields separated by tabs. The log's lines hold
+    no tab, so cut finds no fields in them and prints each line whole.
+    -d ' ' makes the space the separator, and field 2 is the IP. cut counts
+    fields from 1, not from 0 as Python's indexes do, so -f 1 is the time.
+    -c 2 picks the second character of each line, the 0 of 2026.
+
+- id: q3
+  objective: 2
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo 9 > counts.txt
+    echo 10 >> counts.txt
+    echo 100 >> counts.txt
+    echo 25 >> counts.txt
+    sort -r counts.txt
+  options:
+    - |-
+      100
+      25
+      10
+      9
+    - |-
+      9
+      25
+      100
+      10
+    - |-
+      10
+      100
+      25
+      9
+  answer: 1
+  explanation: >-
+    Without -n, sort compares the lines as text, one character at a time:
+    10, 100, 25, 9, because 1 comes before 2 and 2 before 9. -r reverses
+    that, so 9 comes first and 10 last. "100 25 10 9" is the order of
+    sort -nr, which compares the numbers. "10 100 25 9" is the text order
+    without -r.
+
+- id: q4
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo 404 > statuses.txt
+    echo 404 >> statuses.txt
+    echo 200 >> statuses.txt
+    echo 404 >> statuses.txt
+    uniq -c statuses.txt | while read -r count status; do
+        echo "$status $count"
+    done
+  options:
+    - |-
+      404 3
+      200 1
+    - |-
+      200 1
+      404 3
+    - |-
+      404 2
+      200 1
+      404 1
+  answer: 2
+  explanation: >-
+    uniq only collapses repeats that are next to each other. The first two
+    lines are 404, then comes a 200, then another 404, so uniq -c counts
+    three runs: two 404s, one 200 and one 404. "404 3" expects uniq to find
+    every 404 in the file, and "200 1" first also expects the lines to be
+    sorted. Sorting first, with sort statuses.txt | uniq -c, gives that.
+
+- id: q5
+  objective: 4
+  type: spot-the-bug
+  prompt: >-
+    statuses.txt holds the statuses of 20 requests, one per line. This
+    pipeline should print how many requests had each status: only the
+    numbers, one per line, with nothing else on the line. Instead it prints
+    only empty lines. Which pipeline fixes it?
+  code: |
+    sort statuses.txt | uniq -c | cut -d ' ' -f 1
+  options:
+    - |-
+      sort statuses.txt | uniq -c | while read -r count status; do echo "$count"; done
+    - "sort statuses.txt | uniq -c | cut -d ' ' -f 2"
+    - "sort statuses.txt | cut -d ' ' -f 1 | uniq -c"
+  answer: 0
+  explanation: >-
+    uniq -c puts some spaces before each count. With -d ' ', cut treats
+    every single space as a separator, so field 1 is the empty text before
+    the first space, and so is field 2. read skips the spaces at the start
+    of a line and splits the rest into the count and the status. Each line
+    of statuses.txt holds only a status, so cut before uniq -c changes
+    nothing, and uniq -c prints each count with spaces before it and the
+    status after it.
+
+- id: q6
+  objective: 4
+  type: spot-the-bug
+  prompt: >-
+    This pipeline should print the two IPs with the most requests in
+    access.log, most first. The log holds five requests from 192.0.2.44,
+    two from 203.0.113.5 and one from 198.51.100.7, mixed together. It
+    prints "192.0.2.44 5" and then "198.51.100.7 1". Which first line fixes
+    it?
+  code: |
+    cut -d ' ' -f 2 access.log | sort | uniq -c | head -n 2 | sort -nr |
+        while read -r count ip; do
+            echo "$ip $count"
+        done
+  options:
+    - "cut -d ' ' -f 2 access.log | uniq -c | sort -nr | head -n 2 |"
+    - "cut -d ' ' -f 2 access.log | sort -nr | uniq -c | head -n 2 |"
+    - "cut -d ' ' -f 2 access.log | sort | uniq -c | sort -nr | head -n 2 |"
+  answer: 2
+  explanation: >-
+    head keeps whatever lines come first. Before sort -nr, those are the
+    first two IPs in text order, 192.0.2.44 and 198.51.100.7, whatever their
+    counts; sort -nr then only puts those two in order. Moving head after
+    sort -nr keeps the two biggest counts. Leaving out the first sort makes
+    uniq -c count runs of the same IP next to each other, not all of its
+    requests, since the log mixes them. sort -nr before uniq -c orders the
+    IPs by the number each one starts with, biggest first, not by their
+    counts, so head keeps 203.0.113.5 and 198.51.100.7.

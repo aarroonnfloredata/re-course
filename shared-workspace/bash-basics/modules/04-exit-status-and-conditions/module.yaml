@@ -1,0 +1,29 @@
+id: 04-exit-status-and-conditions
+title: Exit Status and Conditions
+exercise_type: implement
+language: bash
+prerequisites:
+- 03-quoting-and-word-splitting
+objectives:
+- Read a command's exit status with $? and end a script with a chosen status using exit
+- Run a command only when another succeeds or fails, with && and ||
+- Branch on a command's success with if, using grep -q as the condition
+- Compare strings and numbers and check files with [[ ]]
+sources:
+- bashguide-tests#Exit_Status-1
+- bashguide-tests#Control_Operators_.28.26.26_and_.7C.7C.29
+- bashguide-tests#Conditional_Blocks_.28if.2C_test_and_.5B.5B.29
+- tlcl#exit-status
+- tlcl#if
+- tlcl#a-more-modern-version-of-test
+- tlcl#file-expressions
+- tlcl#string-expressions
+- tlcl#integer-expressions
+- tlcl#control-operators-another-way-to-branch
+- bashpitfalls#if_.5Bgrep_foo_myfile.5D
+- bashpitfalls#A.5B_.24foo_.3D_.22bar.22_.5D
+- bashpitfalls#cmd1_.26.26_cmd2_.7C.7C_cmd3
+- bashguide-commands#Commands_and_Arguments
+- tlcl#double-quotes
+- tlcl#bracket-expressions-and-character-classes
+- tlcl#redirecting-standard-output-and-standard-error-to-one-file

@@ -1,0 +1,19 @@
+id: 08-sed
+title: Editing Text with sed
+exercise_type: implement
+language: bash
+prerequisites:
+- 07-regular-expressions
+objectives:
+- Replace text on every line with sed 's/old/new/' and the g flag
+- Reuse matched parts with sed -E groups and \1
+- Delete or print chosen lines with sed's d command and -n with p
+- Write the result to a new file, never to the file being read
+sources:
+- tlcl#sed
+- bashpitfalls#cat_file_.7C_sed_s.2Ffoo.2Fbar.2F_.3E_file
+- bashpitfalls#sed_.27s.2F.24foo.2Fgood_bye.2F.27
+- tlcl#posix-basic-vs-extended-regular-expressions
+- tlcl#metacharacters-and-literals
+- bashguide-io#File_Redirection-1
+- bashguide-tests#Control_Operators_.28.26.26_and_.7C.7C.29

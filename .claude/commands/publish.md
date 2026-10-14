@@ -23,7 +23,15 @@ name comes from `$ARGUMENTS`.
    with `--accept-unknown-licenses`. Better still, add the `license` to the
    source in `brief.yaml` and run `/ingest` for it.
 
-3. **Commit, only with the author's OK:** show what changed:
+3. **Restricted licences:** if it lists sources with a restricted licence,
+   show each one's `license` from `brief.yaml` with the modules that cite it.
+   Remind the author that the licence limits sharing material built from
+   the source, and that publishing these modules is their responsibility.
+   Only if the author confirms, run it again with
+   `--accept-restricted-licenses`. Ask separately from unknown licences;
+   one confirmation never covers the other.
+
+4. **Commit, only with the author's OK:** show what changed:
 
    ```
    git status --short shared-workspace/<course>

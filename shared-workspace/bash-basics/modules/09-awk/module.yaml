@@ -1,0 +1,16 @@
+id: 09-awk
+title: Fields and Totals with awk
+exercise_type: implement
+language: bash
+prerequisites:
+- 08-sed
+objectives:
+- Print chosen fields of each line with awk's $1, $2, … and $NF
+- Select lines with a comparison or a regular expression as the pattern
+- Add up values across lines and print the total in an END block
+sources:
+- wikipedia-awk#Structure_of_AWK_programs
+- wikipedia-awk#The_print_command
+- wikipedia-awk#Built-in_variables
+- wikipedia-awk#Variables_and_syntax
+- wikipedia-awk#Sum_last_word

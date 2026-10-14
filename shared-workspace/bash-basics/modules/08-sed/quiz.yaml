@@ -1,0 +1,184 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "10.0.0.1" > ips.txt
+    echo "10.0.0.2" >> ips.txt
+    sed 's/0/X/' ips.txt
+  options:
+    - |-
+      1X.0.0.1
+      10.0.0.2
+    - |-
+      1X.X.X.1
+      1X.X.X.2
+    - |-
+      1X.0.0.1
+      1X.0.0.2
+  answer: 2
+  explanation: >-
+    Without an address, sed runs the s command on every line, so both lines
+    change. On each line, s replaces only the first match, the 0 in 10. The
+    first option changes only the first match in the whole file; sed works
+    line by line. The second replaces every 0 on each line, which needs the
+    g flag: s/0/X/g.
+
+- id: q2
+  objective: 1
+  type: spot-the-bug
+  prompt: >-
+    These commands should replace the IP 203.0.113.5 in access.log with
+    x.x.x.x, but sed prints every line unchanged. Which sed command fixes
+    it?
+  code: |
+    ip="203.0.113.5"
+    sed 's/$ip/x.x.x.x/g' access.log
+  options:
+    - |-
+      sed "s/$ip/x.x.x.x/g" access.log
+    - |-
+      sed 's/${ip}/x.x.x.x/g' access.log
+    - |-
+      sed -E 's/$ip/x.x.x.x/g' access.log
+  answer: 0
+  explanation: >-
+    In single quotes, bash doesn't expand $ip, so sed gets the text $ip and
+    looks for it in each line. In double quotes, bash puts the value in
+    before sed starts. The dots in the value then match any character, so
+    the pattern is looser than the IP, but it still finds the IP. Braces
+    don't help: inside single quotes, ${ip} stays as typed too. -E changes
+    how sed reads the regular expression, not what bash passes to it.
+
+- id: q3
+  objective: 2
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "GET /index.html 200 512" | sed -E 's/^([A-Z]+) ([^ ]+) [0-9]+/\2 \1/'
+  options:
+    - "/index.html GET 200 512"
+    - "/index.html GET 512"
+    - "/index.html GET"
+  answer: 1
+  explanation: >-
+    The pattern matches "GET /index.html 200": the method in group 1, the
+    path in group 2, then the status, which is in no group. s puts the
+    replacement, the path, a space and the method, where that match was.
+    The status was matched but the replacement doesn't write it, so it is
+    gone; "/index.html GET 200 512" keeps it. The bytes, " 512", were not
+    matched, so they stay; "/index.html GET" drops them, but s replaces
+    only the matched part of a line, not the whole line.
+
+- id: q4
+  objective: 2
+  type: spot-the-bug
+  prompt: >-
+    This command should print each request in access.log as its client IP
+    followed by its time, but sed stops with an error about \2 instead.
+    Which command fixes it?
+  code: |
+    sed 's/^([^ ]+) ([^ ]+) .*$/\2 \1/' access.log
+  options:
+    - |-
+      sed 's/^([^ ]+) ([^ ]+) .*$/$2 $1/' access.log
+    - |-
+      sed "s/^([^ ]+) ([^ ]+) .*$/\2 \1/" access.log
+    - |-
+      sed -E 's/^([^ ]+) ([^ ]+) .*$/\2 \1/' access.log
+  answer: 2
+  explanation: >-
+    Without -E, sed reads a basic regular expression, in which ( ) and +
+    are plain characters. The pattern then has no groups, so \2 refers to
+    nothing. -E makes ( ) a group and + "one or more". Double quotes don't
+    change what sed gets here, so the error stays. With $2 $1 the pattern
+    still has no groups and matches nothing, and even when it matched, sed
+    would write the text $2 $1: sed's groups are \1 and \2.
+
+- id: q5
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "GET /index.html 200" > requests.txt
+    echo "GET /missing.html 404" >> requests.txt
+    echo "GET /about.html 200" >> requests.txt
+    sed '/ 404$/p' requests.txt
+  options:
+    - "GET /missing.html 404"
+    - |-
+      GET /index.html 200
+      GET /missing.html 404
+      GET /missing.html 404
+      GET /about.html 200
+    - |-
+      GET /index.html 200
+      GET /missing.html 404
+      GET /about.html 200
+  answer: 1
+  explanation: >-
+    sed prints every line by default, and p prints the chosen line once
+    more, so the 404 line comes out twice. To print only the chosen lines,
+    turn the default printing off with -n: sed -n '/ 404$/p'. The last
+    option treats p as doing nothing because every line is printed anyway,
+    but p prints on top of that.
+
+- id: q6
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "GET /a 200" > requests.txt
+    echo "GET /b 404" >> requests.txt
+    echo "GET /c 200" >> requests.txt
+    echo "GET /d 500" >> requests.txt
+    sed '2,3d' requests.txt
+  options:
+    - |-
+      GET /a 200
+      GET /d 500
+    - |-
+      GET /b 404
+      GET /c 200
+    - |-
+      GET /a 200
+      GET /c 200
+      GET /d 500
+    - |-
+      GET /a 200
+      GET /b 404
+  answer: 0
+  explanation: >-
+    2,3 chooses lines 2 to 3, both included, counting from 1, and d deletes
+    them, so lines 1 and 4 are left. "GET /b 404" and "GET /c 200" are the
+    lines d removes, not the ones it keeps. The third option leaves out
+    the end of the range, as a Python slice does. The last counts lines
+    from 0, as Python's indexes do.
+
+- id: q7
+  objective: 4
+  type: spot-the-bug
+  prompt: >-
+    This command should change http: to https: in every line of links.txt
+    and keep the result in links.txt. Afterwards, links.txt is empty. Which
+    command fixes it?
+  code: |
+    sed 's/http:/https:/g' links.txt > links.txt
+  options:
+    - |-
+      sed 's/http:/https:/g' links.txt >> links.txt
+    - |-
+      sed 's/http:/https:/g' links.txt > links.new && mv links.new links.txt
+    - |-
+      cat links.txt | sed 's/http:/https:/g' > links.txt
+  answer: 1
+  explanation: >-
+    > empties links.txt before sed starts, so sed reads an empty file. Write
+    the result to a new file, then move it over the original with mv; &&
+    runs mv only when sed succeeded. >> doesn't empty the file, but it adds
+    to the file sed is reading: the old lines stay, and the file can keep
+    growing. Reading through cat and a pipe is the same mistake: you can't
+    read from a file and write to it in the same pipeline.

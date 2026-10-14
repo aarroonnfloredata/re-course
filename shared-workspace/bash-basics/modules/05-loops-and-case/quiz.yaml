@@ -1,0 +1,189 @@
+# `objective` is the 1-based number from module.yaml.
+# `answer` is the 0-based index into `options`.
+
+- id: q1
+  objective: 1
+  type: spot-the-bug
+  prompt: >-
+    This loop should print the last request of every .log file in the
+    current folder. It works for access.log, but for "monday log.log" tail
+    reports that the files monday and log.log don't exist. Which first line
+    fixes it?
+  code: |
+    for file in $(ls *.log); do
+        tail -n 1 "$file"
+    done
+  options:
+    - 'for file in "$(ls *.log)"; do'
+    - 'for file in *.log; do'
+    - 'for file in "*.log"; do'
+  answer: 1
+  explanation: >-
+    The unquoted $(ls *.log) is split into words at every space, so
+    "monday log.log" becomes two words. A glob gives each matching name as
+    one word, spaces and all, so for file in *.log fixes it. Quoting
+    "$(ls *.log)" makes all of ls's output a single word, so the loop runs
+    once with both names, and a newline between them, in $file. Quoting
+    "*.log" turns the glob into plain text, so the loop runs once with the
+    name *.log, which no file has.
+
+- id: q2
+  objective: 1
+  type: predict-output
+  prompt: The folder holds only the access.log written here. What does this print?
+  code: |
+    echo "2026-10-06T10:15:40 198.51.100.7 GET /missing.html 404 153" > access.log
+    for file in *.txt *.log; do
+        echo "checking $file"
+    done
+  options:
+    - "checking access.log"
+    - |-
+      checking *.txt
+      checking *.log
+    - |-
+      checking *.txt
+      checking access.log
+  answer: 2
+  explanation: >-
+    No file matches *.txt, so that glob stays as it is and the loop runs
+    once with the pattern itself. That's why loops over globs check
+    [[ -e $file ]] || continue. "checking access.log" alone expects an
+    unmatched glob to disappear, as Python's glob.glob() returns an empty
+    list. "checking *.log" forgets that bash expands the globs in a for
+    loop's word list.
+
+- id: q3
+  objective: 2
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    echo "2026-10-06T10:15:40 198.51.100.7 GET /missing.html 404 153" > access.log
+    while read -r time ip method path; do
+        echo "$path"
+    done < access.log
+  options:
+    - "/missing.html 404 153"
+    - "/missing.html"
+    - "153"
+  answer: 0
+  explanation: >-
+    read puts one field in each name, and the last name gets the rest of
+    the line. The line has six fields but read has only four names, so
+    path holds "/missing.html 404 153". "/missing.html" expects the extra
+    fields to be dropped. "153" expects read to fill the names from the end
+    of the line.
+
+- id: q4
+  objective: 2
+  type: spot-the-bug
+  prompt: >-
+    This loop should print the path of every request in access.log. For the
+    request with the path /scripts/..\..\winnt/cmd.exe, it prints
+    /scripts/....winnt/cmd.exe instead. Which change fixes it?
+  code: |
+    while read _ _ _ path _ _; do
+        echo "$path"
+    done < access.log
+  options:
+    - "Name every field instead of using _: while read time ip method path status bytes; do"
+    - 'Print with printf instead of echo: printf ''%s\n'' "$path"'
+    - "Add -r: while read -r _ _ _ path _ _; do"
+  answer: 2
+  explanation: >-
+    Without -r, read drops the backslashes before path ever holds the
+    value, so nothing done with $path later can bring them back. With -r,
+    read keeps them, and echo "$path" prints them as they are. The name _
+    only stands for fields you don't use; real names don't change how read
+    treats backslashes. printf would print the same text as echo: the
+    backslashes are already gone when either one gets the value.
+
+- id: q5
+  objective: 3
+  type: predict-output
+  prompt: What does the last line print?
+  code: |
+    echo "2026-10-06T10:15:32 203.0.113.5 GET /index.html 200 512" > access.log
+    echo "2026-10-06T10:15:40 198.51.100.7 GET /missing.html 404 153" >> access.log
+    echo "2026-10-06T10:17:03 198.51.100.7 GET /favicon.ico 404 153" >> access.log
+    count=0
+    cat access.log | while read -r _ _ _ _ status _; do
+        if [[ $status = 404 ]]; then
+            (( count++ ))
+        fi
+    done
+    echo "404 requests: $count"
+  options:
+    - "404 requests: 2"
+    - "404 requests: 0"
+    - "404 requests: 3"
+    - "404 requests: "
+  answer: 1
+  explanation: >-
+    The loop is part of a pipeline, so it runs in a separate subshell. It
+    does count two 404 requests, but only in the subshell's copy of count;
+    the echo after the loop reads the shell's own count, still 0. Reading
+    the file with done < access.log instead keeps the count, and that loop
+    would print 2. 3 counts every line, not only the 404 ones. An empty
+    count would need count to be unset, but it was set to 0 first.
+
+- id: q6
+  objective: 3
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    requests=0
+    total=0
+    for bytes in 512 153 1; do
+        total=$total+$bytes
+        (( requests++ ))
+    done
+    echo "$total bytes in $requests requests"
+  options:
+    - "666 bytes in 3 requests"
+    - "0+512+153+1 bytes in 3 requests"
+    - "512+153+1 bytes in 3 requests"
+  answer: 1
+  explanation: >-
+    Bash keeps values as text, so total=$total+$bytes just glues the text
+    together, starting from "0". Only arithmetic computes: (( requests++ ))
+    does, so requests is 3, and (( total += bytes )) or
+    total=$((total + bytes)) would give 666. "512+153+1" forgets the 0
+    that total starts with.
+
+- id: q7
+  objective: 4
+  type: predict-output
+  prompt: What does this print?
+  code: |
+    for status in 404 500 302; do
+        case "$status" in
+            4??) echo "$status: client error" ;;
+            404) echo "$status: not found" ;;
+            4*|5*) echo "$status: error" ;;
+            *) echo "$status: fine" ;;
+        esac
+    done
+  options:
+    - |-
+      404: not found
+      500: error
+      302: fine
+    - |-
+      404: client error
+      404: not found
+      404: error
+      500: error
+      302: fine
+    - |-
+      404: client error
+      500: error
+      302: fine
+  answer: 2
+  explanation: >-
+    Once a pattern matches, case runs its commands and checks no more
+    patterns. For 404, 4?? comes first, so the 404) choice is never reached:
+    put the most specific pattern first. 500 matches 5* in the third choice,
+    and 302 only matches *. Expecting "not found" assumes the closest
+    pattern wins, wherever it is. The long answer expects case to go on
+    to the following patterns after a match.
