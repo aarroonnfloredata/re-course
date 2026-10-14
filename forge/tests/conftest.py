@@ -9,6 +9,7 @@ from forge.new_course import create
 
 ROOT = Path(__file__).resolve().parents[2]
 GOLDEN = ROOT / "examples/python/implement-strings"
+GOLDEN_REFACTOR = ROOT / "examples/python/refactor-long-method"
 BASH_FIXTURE = ROOT / "runtime/tests/fixtures/bash-course"
 
 
@@ -27,6 +28,12 @@ def copy_course(source, tmp_path):
 def course(tmp_path):
     """A copy of the golden example."""
     return copy_course(GOLDEN, tmp_path)
+
+
+@pytest.fixture
+def refactor_course(tmp_path):
+    """A copy of the refactor golden example."""
+    return copy_course(GOLDEN_REFACTOR, tmp_path)
 
 
 @pytest.fixture

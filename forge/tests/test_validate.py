@@ -1,9 +1,11 @@
+import json
 import shutil
 
 from conftest import edit
 
-from forge.validate import validate
+from forge.validate import EXERCISE_TYPES, validate
 from forge.validate.__main__ import main
+from forge.validate.core import SPEC
 
 MODULE = "modules/01-strings"
 
@@ -15,6 +17,16 @@ def assert_found(problems, *expected):
 
 def test_golden_example_passes(course):
     assert validate(course).problems == []
+
+
+def test_exercise_types_agree():
+    """spec/exercise-types/, both schemas and the validator know the same types."""
+    specs = {path.stem for path in (SPEC / "exercise-types").glob("*.md")}
+    module = json.loads((SPEC / "schemas/module.schema.json").read_text())
+    outline = json.loads((SPEC / "schemas/outline.schema.json").read_text())
+    assert set(module["properties"]["exercise_type"]["enum"]) == specs
+    assert set(outline["$defs"]["module"]["properties"]["exercise_type"]["enum"]) == specs
+    assert set(EXERCISE_TYPES) == specs
 
 
 def test_static_problems(course):
@@ -114,3 +126,49 @@ def test_cli(course, capsys):
 def test_cli_without_a_course(tmp_path, capsys):
     assert main([str(tmp_path)]) == 2
     assert "no course.yaml" in capsys.readouterr().err
+
+
+REFACTOR_MODULE = "modules/01-long-method"
+
+
+def test_refactor_example_passes(refactor_course):
+    assert validate(refactor_course).problems == []
+
+
+def test_refactor_problems(refactor_course):
+    module = refactor_course / REFACTOR_MODULE
+    edit(module / "tests/test_structure.py", "@pytest.mark.objective(3)\ndef test_no_comments",
+         "@pytest.mark.objective(3)\ndef test_always_passes():\n    pass\n\n\n"
+         "@pytest.mark.objective(3)\ndef test_no_comments")
+    edit(module / "broken/comments-kept/exercise/receipt.py", "        return 0\n    return 4.95",
+         "        return 0\n    return 5.95")
+    edit(module / "broken/discount-ignores-threshold/exercise/receipt.py",
+         'if code == "SAVE10":', 'if code == "SAVE10" and subtotal >= 39:')
+    edit(module / "broken/printing-left-inline/exercise/receipt.py",
+         "# Broken variant: smell:", "# Broken variant:")
+    problems = validate(refactor_course).problems
+    assert_found(
+        problems,
+        "starter: test_structure::test_always_passes passes, so it checks nothing",
+        "but a smell variant must keep the behaviour",
+        "broken/discount-ignores-threshold: no behaviour test catches it",
+        "broken/printing-left-inline/exercise/receipt.py: the first line must name the kind",
+    )
+
+
+def test_refactor_behaviour_test_must_pass_on_the_starter(refactor_course):
+    module = refactor_course / REFACTOR_MODULE
+    edit(module / "tests/test_behaviour.py", "Total                      16.95",
+         "Total                      17.95")
+    assert_found(
+        validate(refactor_course).problems,
+        "starter: behaviour test test_behaviour::test_print_receipt_prints_the_same"
+        "[small-order-pays-shipping] fails, so it pins down something the starter doesn't do",
+    )
+
+
+def test_refactor_needs_both_kinds_of_variant(refactor_course):
+    module = refactor_course / REFACTOR_MODULE
+    for variant in ("comments-kept", "printing-left-inline"):
+        shutil.rmtree(module / "broken" / variant)
+    assert_found(validate(refactor_course, execute=False).problems, "broken/: no smell variant")
