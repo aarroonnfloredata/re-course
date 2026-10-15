@@ -246,7 +246,10 @@ from the source itself, so it stays the same between runs:
 
 - **HTML:** the heading's anchor: its own `id`, an anchor inside it, the `id`
   of the section that wraps it, or an empty anchor just before it
-  (`pytutorial#text` matches `introduction.html#text`).
+  (`pytutorial#text` matches `introduction.html#text`). Text before the
+  page's first heading, such as a Wikipedia article's opening paragraphs,
+  gets a heading named after the page with the ID `top`
+  (`wiki-code-smell#top`); `<url>#top` opens the page at its top.
 - **PDF:** the PDF's table of contents. The ID is the section number when the
   title starts with one (`7.3`); without a table of contents, each page is a
   section (`page-12`).
