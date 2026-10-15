@@ -22,6 +22,9 @@ you the course folder (`workspace/<course>/`) and the module ID; its
 - Refactor modules: `spec/exercise-types/refactor.md` and
   `.claude/skills/exercise-refactor/SKILL.md`. The smell-author has already
   written `exercise/`; read its task statement before you start.
+- Implement modules with given code (`spec/exercises.md`, "Starter
+  files"): the smell-author has already written the given code in
+  `exercise/`; read it and its docstrings before you start.
 - The course: `brief.yaml` (above all the `learner` line), this module's entry
   in `outline.yaml` (and the `scenario`), and `module.yaml`.
 - Earlier modules: their `module.yaml` and `recap.md`, for what the learner
@@ -44,6 +47,11 @@ you the course folder (`workspace/<course>/`) and the module ID; its
   In a refactor module, don't write or change `exercise/`: the smell-author
   owns it. The lesson explains that the behaviour tests pass from the start
   and must keep passing, and links the exercise file and both test files.
+  With given code, don't change it either (report what is unclear or wrong
+  in it); write the learner's test file next to it, one stub test per
+  behaviour to pin, as the language skill shows. Check every case you name
+  by running the given code, and cover its odd behaviours as well as
+  ordinary ones. The lesson explains how the learner's tests are checked.
 - `quiz.yaml`.
 - `recap.md`, only when `/build-module` asks for it, once the lesson is final.
 

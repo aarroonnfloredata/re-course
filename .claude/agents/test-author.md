@@ -49,6 +49,15 @@ In a refactor module, the exercise tests are of two kinds:
   testing properties, never one particular design. Tests of a new
   requirement go in `test_extension`.
 
+In an implement module with given code (`spec/exercises.md`, "Starter
+files"), the learner writes tests and your exercise tests check them, as the
+language skill shows: each learner test must make the call its
+documentation names and pass on the given code, and fail on altered copies
+of it. Write the altered copies: each a plausible regression that changes
+one behaviour, and at least one aimed at each learner test. Where the test
+file's rules allow it, also run the learner's tests on a copy refactored
+without changing any result, where they must still pass.
+
 If the starter documentation is ambiguous or leaves a behaviour open, don't
 guess: report it, so the starter files get fixed.
 

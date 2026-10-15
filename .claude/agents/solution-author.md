@@ -46,6 +46,15 @@ their first line: `behaviour` (a refactoring step that changed what the code
 does) and `smell` (same behaviour, but a target is still missed). At least
 one of each.
 
+In an implement module with given code (`spec/exercises.md`, "Starter
+files"), the solution is the learner's tests, each written as its
+documentation asks and asserting what the given code really returns (run it
+to find out), plus an unchanged copy of each given file. Variants are
+mistakes a learner writing tests makes: asserting the result they reasoned
+out instead of the one the code returns, a test too weak to catch a change
+(e.g. checking only that the result is positive), pinning another case than
+the one named, or breaking a rule the test file's documentation states.
+
 ## Check, then report
 
 Without the tests: run every documented example against your solution (the
@@ -57,6 +66,10 @@ odd cases included, and confirm they give the same results. Each `behaviour`
 variant must differ from the starter on some input; each `smell` variant
 must match it on every input and clearly miss a target (measure it as the
 language skill shows).
+
+With given code, run your tests on the given code and confirm they pass.
+For each variant, name the change to the given code it fails to catch, or
+show that it fails on the given code.
 
 Report briefly: the files you wrote, for each variant the documented
 behaviour it breaks, and any gaps in the starter documentation.
