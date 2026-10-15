@@ -15,8 +15,8 @@ def test_find_root_outside_a_course(tmp_path):
 def test_load_course(course_dir):
     course = load_course(course_dir)
     assert course.title == "Python Strings"
-    assert [module.id for module in course.modules] == ["01-strings"]
-    module = course.modules[0]
+    assert [module.id for module in course.modules()] == ["01-strings"]
+    module = course.find_module("01")
     assert module.language == "python"
     assert module.challenges == ["c1", "c2", "c3"]
 
@@ -30,5 +30,6 @@ def test_find_module_by_id_or_number(course_dir):
 
 def test_missing_module_file(course_dir):
     (course_dir / "modules/01-strings/module.yaml").unlink()
+    course = load_course(course_dir)
     with pytest.raises(CourseError, match="Missing file"):
-        load_course(course_dir)
+        course.find_module("01")
