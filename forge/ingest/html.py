@@ -7,7 +7,7 @@ URLs (`introduction.html#text` -> `{#text}`).
 import re
 from urllib.parse import urljoin
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment, NavigableString
 from markdownify import MarkdownConverter
 
 from .common import Converted, IngestError, SectionIds, slugify
@@ -43,6 +43,7 @@ def convert(html, base_url=None, selector=None, exclude=()):
         for image in main.find_all("img", src=True):
             image["src"] = urljoin(base_url, image["src"])
 
+    mark_lead(soup, main)
     anchors = mark_headings(main)
     converter = MarkdownConverter(heading_style="ATX", bullets="-",
                                   code_language_callback=code_language)
@@ -71,6 +72,24 @@ def main_content(soup, selector):
             return found, []
     return soup.body or soup, ["used the whole page (no <main> or <article>); "
                                "if menus or footers got in, set a `selector`"]
+
+
+def mark_lead(soup, main):
+    """Give text before the first heading a heading of its own, named after the
+    page and with the ID `top`, so it can be cited; `<url>#top` opens the page
+    at its top. It takes the first heading's level, so it holds only that text."""
+    first = main.find(HEADINGS)
+    for node in main.descendants:
+        if node is first:
+            return
+        if isinstance(node, NavigableString) and not isinstance(node, Comment) and node.strip():
+            break
+    else:
+        return
+    heading = soup.find("h1")
+    lead = soup.new_tag(first.name if first is not None else "h1", id="top")
+    lead.string = heading.get_text(" ", strip=True) if heading else page_title(soup)
+    main.insert(0, lead)
 
 
 def mark_headings(main):
