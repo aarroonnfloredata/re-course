@@ -1,6 +1,6 @@
 ---
 name: lang-python
-description: "How to write Python course material for re-course - starter stubs, challenge and exercise tests (pytest; behaviour tests and structural checks for refactor modules), solutions, broken variants, runnable lesson examples and predict-output quiz code. Use when writing or fixing any of these for a module with `language: python`."
+description: "How to write Python course material for re-course - starter stubs, challenge and exercise tests (pytest; behaviour tests and structural checks for refactor modules; checks of the learner's own tests for given code), solutions, broken variants, runnable lesson examples and predict-output quiz code. Use when writing or fixing any of these for a module with `language: python`."
 ---
 
 # Python course material
@@ -149,6 +149,82 @@ def test_c1_last_char():
   ```python
   # Broken variant: mask() keeps the first `keep` characters instead of the last.
   ```
+
+## Tests for given code
+
+For an `implement` module with given code (`spec/exercises.md`, "Starter
+files"): the learner writes tests for code they don't change.
+
+### Starter files
+
+The given file, `exercise/<name>.py` (written by the smell-author), and the
+learner's test file next to it, `exercise/test_<name>.py`. The test file
+imports the given code at the top (`from <name> import ...`); pytest puts
+the file's own folder on the import path. Its module docstring says what the
+file is and states the rules the checks need:
+
+- Keep each test's name, and keep it a function without parameters (no
+  fixtures, no `parametrize`): the checks call each test on its own.
+- Create what the call needs inside each test.
+- Make the call the test's docstring names, with exactly those arguments.
+- Assert with `==` only on what the call returns, not on attributes or
+  helpers a refactoring may change.
+- Run the tests from the exercise folder with `uv run pytest
+  test_<name>.py`; they must pass on the given code. Then `learn check`.
+
+```python
+def test_heavy_parcel_abroad():
+    """Pin the cost of a 25 kg parcel sent abroad.
+
+    shipping_cost(25, "abroad"). Assert the exact result shipping_cost()
+    returns today, found by running it.
+    """
+    # TODO: write test_heavy_parcel_abroad()
+    raise NotImplementedError
+```
+
+The docstring names the case and never the expected result: finding it is
+the learner's work.
+
+### Checking the learner's tests
+
+The exercise tests (`tests/test_exercise.py`):
+
+- Load the learner's test file with `load()` while the given module, or an
+  altered copy of it, is in `sys.modules` under the given module's name, so
+  its `from <name> import ...` picks that up.
+- Make each altered copy from the given file's source by replacing a few
+  lines, so it follows the given code. If those lines aren't found, fail
+  with a message that the given file was changed and must be restored.
+- Call each learner test function directly. `NotImplementedError` means it
+  isn't written yet; any other exception, `AssertionError` included, means
+  it failed.
+- Wrap the function under test to record the calls each learner test makes,
+  so a test that never makes its named call gets a plain message.
+- Parametrize over (learner test, altered copy) pairs, so each one is
+  reported on its own.
+- In a cumulative course, when an earlier module already has helpers for
+  this, copy them into `tests/` instead of writing new ones.
+
+Messages, for example:
+
+```
+test_heavy_parcel_abroad() is not written yet.
+test_heavy_parcel_abroad() never calls shipping_cost(25, 'abroad'), the call its docstring names.
+test_heavy_parcel_abroad() fails on shipping.py: AssertionError. Its calls there:
+    shipping_cost(25, 'abroad') returns 31.5
+test_heavy_parcel_abroad() still passes when parcels over 20 kg are no longer charged extra, so it doesn't pin that behaviour.
+```
+
+### Solutions and broken variants
+
+The solution has the test file with every stub written, and an unchanged
+copy of the given file. A variant is a copy of the test file with one test
+wrong:
+
+```python
+# Broken variant: test_heavy_parcel_abroad() asserts the cost reasoned out from the code, not the one shipping_cost() returns.
+```
 
 ## Refactor modules
 
