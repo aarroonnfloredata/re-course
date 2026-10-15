@@ -40,6 +40,28 @@ def test_stubs_and_changed_units(course_dir):
     assert python.changed_units(module / "solution/exercise/text_tools.py", variant) == ["mask"]
 
 
+def test_stubs_and_changed_units_name_methods_by_class(tmp_path):
+    starter = tmp_path / "starter.py"
+    starter.write_text(
+        "class Shelf:\n"
+        "    def add(self, book):\n"
+        "        # TODO: write add()\n"
+        "        raise NotImplementedError\n"
+        "\n"
+        "    def count(self):\n"
+        "        return 0\n"
+        "\n"
+        "\n"
+        "def total(items):\n"
+        "    raise NotImplementedError\n"
+    )
+    assert python.stubs(starter) == ["Shelf.add", "total"]
+    solution, variant = tmp_path / "solution.py", tmp_path / "variant.py"
+    solution.write_text("class Shelf:\n    def add(self, book):\n        return [book]\n")
+    variant.write_text("class Shelf:\n    def add(self, book):\n        # changed\n        return []\n")
+    assert python.changed_units(solution, variant) == ["Shelf.add"]
+
+
 def test_main_reports_a_failing_job_and_continues(monkeypatch, capsys):
     jobs = [{"kind": "nonsense"}, {"kind": "snippets", "language": "python", "codes": ["print(1)"]}]
     monkeypatch.setattr("sys.stdin", io.StringIO(json.dumps(jobs)))
