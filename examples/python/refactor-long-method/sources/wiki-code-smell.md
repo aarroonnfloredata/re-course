@@ -2,9 +2,11 @@
 id: wiki-code-smell
 title: Code smell - Wikipedia
 url: https://en.wikipedia.org/wiki/Code_smell
-retrieved: 2026-10-14
+retrieved: 2026-10-15
 license: Wikipedia, CC BY-SA 4.0
 ---
+
+## Code smell {#top}
 
 In [computer programming](https://en.wikipedia.org/wiki/Computer_programming "Computer programming"), a **code smell** is any characteristic of [source code](https://en.wikipedia.org/wiki/Source_code "Source code") that hints at a deeper problem. Determining what a code smell is and is not is subjective, and varies by [language](https://en.wikipedia.org/wiki/Programming_language "Programming language"), developer, and development methodology.
 

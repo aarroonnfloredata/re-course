@@ -2,9 +2,11 @@
 id: wiki-refactoring
 title: Code refactoring - Wikipedia
 url: https://en.wikipedia.org/wiki/Code_refactoring
-retrieved: 2026-10-14
+retrieved: 2026-10-15
 license: Wikipedia, CC BY-SA 4.0
 ---
+
+## Code refactoring {#top}
 
 In [computer programming](https://en.wikipedia.org/wiki/Computer_programming "Computer programming") and [software design](https://en.wikipedia.org/wiki/Software_design "Software design"), **code refactoring** is the process of restructuring existing [source code](https://en.wikipedia.org/wiki/Source_code "Source code")—changing the *[factoring](https://en.wikipedia.org/wiki/Decomposition_(computer_science) "Decomposition (computer science)")*—without changing its external behavior. Refactoring is intended to improve the design, structure, or implementation of the [software](https://en.wikipedia.org/wiki/Software "Software") (its *[non-functional](https://en.wikipedia.org/wiki/Non-functional_requirement "Non-functional requirement")* attributes), while preserving its [functionality](https://en.wikipedia.org/wiki/Functional_requirement "Functional requirement"). Potential advantages of refactoring may include improved code [readability](https://en.wikipedia.org/wiki/Readability "Readability") and reduced [complexity](https://en.wikipedia.org/wiki/Cyclomatic_complexity "Cyclomatic complexity"); these can improve the source code's [maintainability](https://en.wikipedia.org/wiki/Maintainability "Maintainability") and create a simpler, cleaner, or more expressive internal [architecture](https://en.wikipedia.org/wiki/Software_architecture "Software architecture") or [object model](https://en.wikipedia.org/wiki/Object_model "Object model") to improve [extensibility](https://en.wikipedia.org/wiki/Extensibility "Extensibility"). Another potential goal for refactoring is improved performance; software engineers face an ongoing challenge to write programs that perform faster or use less memory. Despite the availability of metrics intended to assess such attributes, developers often do not rely on them when making refactoring decisions due to concerns about its practical usefulness.
 
