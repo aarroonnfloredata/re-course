@@ -26,6 +26,16 @@ Challenges, and the exercise in `implement`, use stubs:
   with examples. Tests check only behaviour stated there.
 - A starter file needs only what the lesson (or an earlier module) covered.
 
+**Given code.** An `implement` exercise can also give the learner working
+code to read but not change, for example legacy code they write
+characterization tests for. The given file's documentation says so. The
+units the learner writes are then test functions in a test file next to it:
+stubs whose documentation names the case to pin, never the expected result.
+The test file's documentation states the rules the checks need (for
+example, which call to make and what to assert on). The exercise tests check
+the learner's tests: each must pass on the given code and fail on altered
+copies of it, each changing behaviour that test pins.
+
 ## Tests
 
 ### Location and naming
@@ -76,7 +86,8 @@ expected and what came back:
 
 ## Solutions
 
-`solution/` mirrors the path of every file the learner edits:
+`solution/` mirrors the path of every file in `exercise/` and
+`challenges/`; given code is copied unchanged:
 
 ```
 solution/
