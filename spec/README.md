@@ -8,14 +8,15 @@ them must agree on is here. Teaching advice and language specifics are not;
 they live in skills and agent prompts.
 
 The reference implementation of this spec is the golden example
-`examples/python/implement-strings/`.
+`examples/python/implement-strings/`; `examples/python/refactor-long-method/`
+is the reference for `refactor` modules.
 
 | File | Contents | Read by |
 |---|---|---|
 | `README.md` | terms, layouts, `course.yaml`, `brief.yaml`, `module.yaml`, sources, objectives, runtime commands | everyone |
 | `content.md` | lesson, runnable examples, citations, challenges, quiz, recap | lesson-writer, fact-checker, reviewer |
-| `exercises.md` | starter files, tests, failure messages, solutions, broken variants | test-author, solution-author |
-| `exercise-types/<type>.md` | validation rules for one exercise type | test-author, solution-author, validator |
+| `exercises.md` | starter files, tests, failure messages, solutions, broken variants | test-author, solution-author, smell-author |
+| `exercise-types/<type>.md` | validation rules for one exercise type | test-author, solution-author, smell-author, validator |
 | `schemas/*.json` | machine-checkable structure | validator, runtime |
 
 Markdown is the source of truth for intent, schemas for structure. Change both
@@ -79,6 +80,7 @@ sources:
     license: "PSF License Version 2"   # optional
     restricted: false                  # optional
     selector: "div.body"               # optional; HTML pages only
+    exclude: [".breadcrumb"]           # optional; HTML pages only
 project_style: independent  # or: cumulative (the template's default)
 dependencies: []            # packages the course needs, e.g. ["polars>=1.0"]
 constraints: ["standard library only"]
@@ -97,6 +99,8 @@ Optional per source:
   `/publish` then needs the author's separate confirmation.
 - `selector`: a CSS selector for the page's main content, for when ingest's
   automatic choice picks up menus or footers.
+- `exclude`: a list of CSS selectors for parts of the main content to drop,
+  such as breadcrumbs or ads, for when no `selector` leaves them out.
 
 `dependencies` is copied into the course's `pyproject.toml`, which defines the
 course's own environment (see "Course environment").
@@ -242,7 +246,10 @@ from the source itself, so it stays the same between runs:
 
 - **HTML:** the heading's anchor: its own `id`, an anchor inside it, the `id`
   of the section that wraps it, or an empty anchor just before it
-  (`pytutorial#text` matches `introduction.html#text`).
+  (`pytutorial#text` matches `introduction.html#text`). Text before the
+  page's first heading, such as a Wikipedia article's opening paragraphs,
+  gets a heading named after the page with the ID `top`
+  (`wiki-code-smell#top`); `<url>#top` opens the page at its top.
 - **PDF:** the PDF's table of contents. The ID is the section number when the
   title starts with one (`7.3`); without a table of contents, each page is a
   section (`page-12`).

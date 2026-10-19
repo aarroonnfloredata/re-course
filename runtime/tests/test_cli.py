@@ -49,6 +49,19 @@ def test_check_shows_the_hint(course_dir, capsys):
     assert "Hint: split() with no argument" in out
 
 
+def test_a_module_not_built_yet_doesnt_stop_the_ones_before_it(course_dir, finish, capsys):
+    course_file = course_dir / "course.yaml"
+    data = yaml.safe_load(course_file.read_text())
+    data["modules"].append("02-lists")
+    course_file.write_text(yaml.safe_dump(data))
+    assert main(["next"]) == 0
+    assert "Next: Strings: Indexing, Slicing and Methods (01-strings)" in capsys.readouterr().out
+    assert main(["check", "01", "c1"]) == 1
+    finish()
+    assert main(["next"]) == 2
+    assert "Missing file" in capsys.readouterr().err
+
+
 def test_check_unknown_part(course_dir, capsys):
     assert main(["check", "c9"]) == 2
     assert "has no part called 'c9'" in capsys.readouterr().err

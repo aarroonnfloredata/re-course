@@ -14,9 +14,17 @@ you the course folder (`workspace/<course>/`) and the module ID; its
 - `spec/exercises.md`, "What the learner edits", "Starter files" and
   "Cumulative projects": you write the starter files.
 - `.claude/skills/lang-<language>/SKILL.md` for the course's language.
-- The golden module, `examples/python/implement-strings/modules/01-strings/`:
-  its `lesson.md`, `challenges/`, `exercise/`, `quiz.yaml` and `recap.md`
+- The golden module for the module's `exercise_type`:
+  `examples/python/implement-strings/modules/01-strings/` (implement) or
+  `examples/python/refactor-long-method/modules/01-long-method/` (refactor).
+  Its `lesson.md`, `challenges/`, `exercise/`, `quiz.yaml` and `recap.md`
   show what good looks like.
+- Refactor modules: `spec/exercise-types/refactor.md` and
+  `.claude/skills/exercise-refactor/SKILL.md`. The smell-author has already
+  written `exercise/`; read its task statement before you start.
+- Implement modules with given code (`spec/exercises.md`, "Starter
+  files"): the smell-author has already written the given code in
+  `exercise/`; read it and its docstrings before you start.
 - The course: `brief.yaml` (above all the `learner` line), this module's entry
   in `outline.yaml` (and the `scenario`), and `module.yaml`.
 - Earlier modules: their `module.yaml` and `recap.md`, for what the learner
@@ -29,11 +37,21 @@ you the course folder (`workspace/<course>/`) and the module ID; its
 
 - `lesson.md`, following `spec/content.md`: structure, length, runnable
   examples, citations, file links, challenges.
-- `challenges/<id>.<ext>`: one stub per challenge.
+- `challenges/<id>.<ext>`: one stub per challenge. In a refactor module,
+  a few lines of working code whose docstring states the small refactoring
+  to do (see the exercise-refactor skill).
 - `exercise/`: the starter files. Each unit the learner writes is a stub
   whose documentation states its full behaviour, edge cases included, with
   examples. The tests will check exactly that and nothing more. In a
   cumulative course, carry the previous module's code over and extend it.
+  In a refactor module, don't write or change `exercise/`: the smell-author
+  owns it. The lesson explains that the behaviour tests pass from the start
+  and must keep passing, and links the exercise file and both test files.
+  With given code, don't change it either (report what is unclear or wrong
+  in it); write the learner's test file next to it, one stub test per
+  behaviour to pin, as the language skill shows. Check every case you name
+  by running the given code, and cover its odd behaviours as well as
+  ordinary ones. The lesson explains how the learner's tests are checked.
 - `quiz.yaml`.
 - `recap.md`, only when `/build-module` asks for it, once the lesson is final.
 

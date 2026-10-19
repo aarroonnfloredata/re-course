@@ -1,0 +1,11 @@
+id: 01-long-method
+title: "Long Functions and Extract Method"
+exercise_type: refactor
+language: python
+prerequisites: []
+objectives:
+  - "Say what refactoring is: changing code's structure so it behaves the same as before"
+  - "Recognise a long function as a code smell: a hint that something may be wrong, not a bug"
+  - "Apply Extract Method: move part of a long function into a new, well-named function and call it"
+  - "Refactor in small steps, running the tests after each one and undoing a step that breaks them"
+sources: [wiki-refactoring#Motivation, wiki-refactoring#Benefits, wiki-refactoring#Testing, wiki-refactoring#Transformations, wiki-code-smell#Definition]

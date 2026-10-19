@@ -14,6 +14,10 @@ change.
 
 ## Starter files
 
+What the starter files hold depends on the exercise type. In `refactor`
+exercises they are working legacy code; see `exercise-types/refactor.md`.
+Challenges, and the exercise in `implement`, use stubs:
+
 - Each unit the learner writes (a function, a script) is a stub: a `TODO`
   comment and the language's way of saying "not written yet" (Python:
   `raise NotImplementedError`; bash: print `<unit> is not written yet.` to
@@ -21,6 +25,16 @@ change.
 - The stub's documentation states the full behaviour, including edge cases,
   with examples. Tests check only behaviour stated there.
 - A starter file needs only what the lesson (or an earlier module) covered.
+
+**Given code.** An `implement` exercise can also give the learner working
+code to read but not change, for example legacy code they write
+characterization tests for. The given file's documentation says so. The
+units the learner writes are then test functions in a test file next to it:
+stubs whose documentation names the case to pin, never the expected result.
+The test file's documentation states the rules the checks need (for
+example, which call to make and what to assert on). The exercise tests check
+the learner's tests: each must pass on the given code and fail on altered
+copies of it, each changing behaviour that test pins.
 
 ## Tests
 
@@ -31,7 +45,8 @@ change.
 - **Challenge checks** are in the test file named `test_challenges`. The
   tests for challenge `c1` are named `test_c1_<anything>`.
 - **Exercise tests** are in any other test file (by convention
-  `test_exercise`).
+  `test_exercise`; `refactor` exercises use `test_behaviour` and
+  `test_structure`).
 - This naming is how the runtime groups results into parts; see
   `README.md`.
 
@@ -71,7 +86,8 @@ expected and what came back:
 
 ## Solutions
 
-`solution/` mirrors the path of every file the learner edits:
+`solution/` mirrors the path of every file in `exercise/` and
+`challenges/`; given code is copied unchanged:
 
 ```
 solution/
@@ -96,8 +112,10 @@ broken/
 - A variant holds full copies of only the files it changes. It is applied on
   top of `solution/`.
 - Each changed file starts with a comment `Broken variant: <what is wrong>`,
-  after the `#!` line if the file has one.
-- At least one variant per unit the learner writes in `exercise/`.
+  after the `#!` line if the file has one. `refactor` variants also name
+  their kind: `Broken variant: behaviour: …` or `Broken variant: smell: …`.
+- `implement`: at least one variant per unit the learner writes in
+  `exercise/`. `refactor`: at least one variant of each kind.
   Challenges have no variants.
 
 What a variant must do under the tests depends on the exercise type; see
@@ -125,3 +143,6 @@ The full rules come with the first cumulative course
   break the next one.
 - **Tests check the new work.** Carried-over code is already correct, so a
   test of it alone would pass on the starter files.
+- **Refactor courses refactor one area per module.** The starter files are
+  the previous module's solution, in which the area this module works on is
+  still in its legacy form. Behaviour tests pin down that area.

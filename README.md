@@ -101,7 +101,9 @@ fixing.
 ## What's supported
 
 - **Course languages:** Python & Bash.
-- **Exercise type:** implement: the learner writes code from scratch.
+- **Exercise types:** implement: the learner writes code from scratch;
+  refactor: the learner cleans up working legacy code without changing what
+  it does.
 - **Sources:** HTML pages, PDFs (best with a table of contents, which
   defines the sections), and local Markdown or text files.
 

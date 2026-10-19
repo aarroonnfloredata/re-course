@@ -1,0 +1,24 @@
+title: Refactoring Long Methods
+spec_version: 1
+language: python
+learner: >-
+  Writes Python comfortably: functions, loops, lists, dictionaries and
+  f-strings. Has run pytest tests. Has changed other people's code, but never
+  refactored it step by step.
+goals:
+  - "recognise a long method and the comments that mark its parts"
+  - "break a long function into well-named functions without changing what it does"
+sources:
+  - id: wiki-refactoring
+    url: https://en.wikipedia.org/wiki/Code_refactoring
+    selector: "#mw-content-text"
+    exclude: [".mw-editsection", "sup.reference", ".hatnote", ".shortdescription", ".mw-references-wrap"]
+    license: "Wikipedia, CC BY-SA 4.0"
+  - id: wiki-code-smell
+    url: https://en.wikipedia.org/wiki/Code_smell
+    selector: "#mw-content-text"
+    exclude: [".mw-editsection", "sup.reference", ".shortdescription", ".mw-references-wrap"]
+    license: "Wikipedia, CC BY-SA 4.0"
+project_style: independent
+dependencies: []
+constraints: ["standard library only"]

@@ -82,32 +82,38 @@ def test_objectives(tests_dir):
 
 
 def stubs(path):
-    """Names of the functions in a starter file that still raise NotImplementedError."""
+    """Names of the units in a starter file that still raise NotImplementedError
+    (see units())."""
     path = Path(path)
     if path.suffix != EXTENSION:
         return []
-    names = []
-    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
-        if isinstance(node, ast.FunctionDef) and any(
-            isinstance(inner, ast.Raise) and inner.exc is not None
-            and "NotImplementedError" in ast.unparse(inner.exc)
-            for inner in ast.walk(node)
-        ):
-            names.append(node.name)
-    return names
+    return [name for name, node in units(path) if any(
+        isinstance(inner, ast.Raise) and inner.exc is not None
+        and "NotImplementedError" in ast.unparse(inner.exc)
+        for inner in ast.walk(node)
+    )]
 
 
 def changed_units(original, changed):
-    """Names of the top-level functions that differ between two versions of a file.
-    Comments don't count."""
-
-    def functions(path):
-        tree = ast.parse(Path(path).read_text(encoding="utf-8"))
-        return {node.name: ast.dump(node) for node in tree.body
-                if isinstance(node, ast.FunctionDef)}
-
+    """Names of the units that differ between two versions of a file (see
+    units()). Comments don't count."""
     if Path(original).suffix != EXTENSION:
         return []
-    before, after = functions(original), functions(changed)
+    before = {name: ast.dump(node) for name, node in units(original)}
+    after = {name: ast.dump(node) for name, node in units(changed)}
     return sorted(name for name in before.keys() | after.keys()
                   if before.get(name) != after.get(name))
+
+
+def units(path):
+    """(name, node) for each top-level function ("name") and each method of a
+    top-level class ("Class.name"). Functions nested inside them belong to
+    them."""
+    found = []
+    for node in ast.parse(Path(path).read_text(encoding="utf-8")).body:
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            found.append((node.name, node))
+        elif isinstance(node, ast.ClassDef):
+            found += [(f"{node.name}.{item.name}", item) for item in node.body
+                      if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef))]
+    return found

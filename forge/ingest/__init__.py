@@ -80,9 +80,11 @@ def ingest_source(course_dir, source, report, refresh, today):
     else:
         raise IngestError("needs a url or a path")
 
-    if source.get("selector") and kind != "html":
-        report.warnings.append("`selector` ignored: it only applies to HTML pages")
-    converted = convert(path, kind, source.get("url"), source.get("selector"))
+    for field in ("selector", "exclude"):
+        if source.get(field) and kind != "html":
+            report.warnings.append(f"`{field}` ignored: it only applies to HTML pages")
+    converted = convert(path, kind, source.get("url"), source.get("selector"),
+                        source.get("exclude") or ())
 
     front = {"id": source_id, "title": converted.title, **origin, "retrieved": today,
              "license": source.get("license") or UNKNOWN_LICENSE}
@@ -110,9 +112,9 @@ def ingest_source(course_dir, source, report, refresh, today):
         report.warnings.append("license unknown: add `license` to this source in brief.yaml")
 
 
-def convert(path, kind, url=None, selector=None):
+def convert(path, kind, url=None, selector=None, exclude=()):
     if kind == "html":
-        return html.convert(path.read_bytes(), base_url=url, selector=selector)
+        return html.convert(path.read_bytes(), base_url=url, selector=selector, exclude=exclude)
     if kind == "pdf":
         return pdf.convert(path)
     return text.convert(path.read_text(encoding="utf-8", errors="replace"), path.stem)

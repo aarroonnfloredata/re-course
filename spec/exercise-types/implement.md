@@ -2,7 +2,9 @@
 
 Applies to modules with `exercise_type: implement`. The learner writes code
 from scratch: the starter files are stubs, and the tests check the finished
-behaviour.
+behaviour. With given code (`exercises.md`, "Starter files"), the stubs are
+tests for that code, and the module's tests check that each one pins its
+case.
 
 Example: `examples/python/implement-strings/`.
 

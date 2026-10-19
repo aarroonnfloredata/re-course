@@ -1,6 +1,6 @@
 ---
 name: lang-python
-description: "How to write Python course material for re-course - starter stubs, challenge and exercise tests (pytest), solutions, broken variants, runnable lesson examples and predict-output quiz code. Use when writing or fixing any of these for a module with `language: python`."
+description: "How to write Python course material for re-course - starter stubs, challenge and exercise tests (pytest; behaviour tests and structural checks for refactor modules; checks of the learner's own tests for given code), solutions, broken variants, runnable lesson examples and predict-output quiz code. Use when writing or fixing any of these for a module with `language: python`."
 ---
 
 # Python course material
@@ -149,6 +149,191 @@ def test_c1_last_char():
   ```python
   # Broken variant: mask() keeps the first `keep` characters instead of the last.
   ```
+
+## Tests for given code
+
+For an `implement` module with given code (`spec/exercises.md`, "Starter
+files"): the learner writes tests for code they don't change.
+
+### Starter files
+
+The given file, `exercise/<name>.py` (written by the smell-author), and the
+learner's test file next to it, `exercise/test_<name>.py`. The test file
+imports the given code at the top (`from <name> import ...`); pytest puts
+the file's own folder on the import path. Its module docstring says what the
+file is and states the rules the checks need:
+
+- Keep each test's name, and keep it a function without parameters (no
+  fixtures, no `parametrize`): the checks call each test on its own.
+- Create what the call needs inside each test.
+- Make the call the test's docstring names, with exactly those arguments.
+- Assert with `==` only on what the call returns, not on attributes or
+  helpers a refactoring may change.
+- Run the tests from the exercise folder with `uv run pytest
+  test_<name>.py`; they must pass on the given code. Then `learn check`.
+
+```python
+def test_heavy_parcel_abroad():
+    """Pin the cost of a 25 kg parcel sent abroad.
+
+    shipping_cost(25, "abroad"). Assert the exact result shipping_cost()
+    returns today, found by running it.
+    """
+    # TODO: write test_heavy_parcel_abroad()
+    raise NotImplementedError
+```
+
+The docstring names the case and never the expected result: finding it is
+the learner's work.
+
+### Checking the learner's tests
+
+The exercise tests (`tests/test_exercise.py`):
+
+- Load the learner's test file with `load()` while the given module, or an
+  altered copy of it, is in `sys.modules` under the given module's name, so
+  its `from <name> import ...` picks that up.
+- Make each altered copy from the given file's source by replacing a few
+  lines, so it follows the given code. If those lines aren't found, fail
+  with a message that the given file was changed and must be restored.
+- Call each learner test function directly. `NotImplementedError` means it
+  isn't written yet; any other exception, `AssertionError` included, means
+  it failed.
+- Wrap the function under test to record the calls each learner test makes,
+  so a test that never makes its named call gets a plain message.
+- Parametrize over (learner test, altered copy) pairs, so each one is
+  reported on its own.
+- In a cumulative course, when an earlier module already has helpers for
+  this, copy them into `tests/` instead of writing new ones.
+
+Messages, for example:
+
+```
+test_heavy_parcel_abroad() is not written yet.
+test_heavy_parcel_abroad() never calls shipping_cost(25, 'abroad'), the call its docstring names.
+test_heavy_parcel_abroad() fails on shipping.py: AssertionError. Its calls there:
+    shipping_cost(25, 'abroad') returns 31.5
+test_heavy_parcel_abroad() still passes when parcels over 20 kg are no longer charged extra, so it doesn't pin that behaviour.
+```
+
+### Solutions and broken variants
+
+The solution has the test file with every stub written, and an unchanged
+copy of the given file. A variant is a copy of the test file with one test
+wrong:
+
+```python
+# Broken variant: test_heavy_parcel_abroad() asserts the cost reasoned out from the code, not the one shipping_cost() returns.
+```
+
+## Refactor modules
+
+For `exercise_type: refactor`. Read `.claude/skills/exercise-refactor/`
+first. Reference module:
+`examples/python/refactor-long-method/modules/01-long-method/`.
+
+### Starter files
+
+Working legacy code, no stubs. The module docstring states the task (see the
+exercise-refactor skill); the interface functions keep their docstrings,
+which describe what they do, not the task.
+
+### Test files
+
+```
+tests/
+├── conftest.py          # copy from the implement reference module, unchanged
+├── helpers.py           # copy from the implement reference module, unchanged
+├── refactoring.py       # copy from the refactor reference module, unchanged
+├── test_challenges.py   # one test per challenge: test_<id>_<what>
+├── test_behaviour.py    # behaviour tests: pass on the starter
+└── test_structure.py    # structural checks (and test_extension.py for a new requirement)
+```
+
+`refactoring.py` provides, for behaviour tests:
+
+- `keeps(func, args, before, kwargs=None)`: fails with "Behaviour changed:
+  … returned X before the refactoring, but now returns Y." unless the call
+  still returns `before`.
+- `keeps_output(func, args, before, kwargs=None)`: the same for what the
+  call prints, shown as indented lines.
+- `keeps_raising(func, args, error_type, kwargs=None)`: the call still
+  raises `error_type`.
+
+and for structural checks, each failing with a message that names the
+property, the value and the target:
+
+- `max_length(path, limit, names=None)`: lines of code in each function's
+  body, not counting the docstring, blank lines and comment lines.
+- `max_complexity(path, limit, names=None)`: cyclomatic complexity, counted
+  the way radon counts it (`if`, `elif`, `for`, `while`, `except`, `with`,
+  `assert`, conditional expressions, comprehensions, match cases, each extra
+  `and`/`or` operand).
+- `max_nesting(path, limit, names=None)`: how deep blocks sit inside each
+  other; an `elif` is not a level.
+- `max_parameters(path, limit, names=None)`: parameters without `self` and
+  `cls`.
+- `no_comments(path, names=None)`: no comments inside functions.
+- `functions(path)` and `function(path, name)`: the file's functions and
+  methods (`"Class.method"`), each with `.length`, `.complexity`,
+  `.nesting`, `.parameters`, `.comments`, `.calls` (names it calls),
+  `.reassigned` (local names assigned with `=` more than once) and
+  `.assigned_parameters`. Use them with `fail(message)` for a target the
+  helpers above don't cover.
+
+`names=None` checks every function and method in the file. `path` is
+relative to the module, like `load()`.
+
+To measure a file before the module has tests (the smell-author and the
+solution-author do this), use the reference module's copy with an absolute
+path, in the course folder:
+
+```
+uv run python -c "
+import sys, pathlib
+sys.path.insert(0, '../../examples/python/refactor-long-method/modules/01-long-method/tests')
+from refactoring import functions
+path = pathlib.Path('modules/<id>/exercise/<file>.py').resolve()
+for f in functions(path).values():
+    print(f, f.length, f.complexity, f.nesting, len(f.parameters), f.comments)
+"
+```
+
+```python
+@pytest.mark.objective(1, 4)
+@pytest.mark.parametrize("order, printed", RECEIPTS)
+def test_print_receipt_prints_the_same(order, printed):
+    receipt = load(EXERCISE)
+    keeps_output(receipt.print_receipt, (order,), printed)
+
+
+@pytest.mark.objective(2, 3)
+def test_no_function_is_longer_than_10_lines():
+    max_length(EXERCISE, 10)
+```
+
+- Behaviour cases use `pytest.param(..., id="what-it-pins")`, so a failure
+  names the behaviour.
+- Get every expected value by running the starter in the course's
+  environment (`uv run python -c ...`) and copying the result.
+- A challenge check uses `check()` from `helpers.py` for the new function,
+  `function(...).calls` to see that the old code calls it, then `keeps()` or
+  `keeps_output()` for the old behaviour. A missing function is a `fail()`
+  with a plain message, not an `AttributeError`.
+
+### Solutions and broken variants
+
+- The solution is the refactored starter file. The module docstring (the
+  task) and the interface docstrings stay exactly the same.
+- A variant's first line names its kind:
+
+  ```python
+  # Broken variant: behaviour: shipping_for() is given the subtotal before the discount.
+  # Broken variant: smell: the item lines and totals are still printed inside print_receipt().
+  ```
+
+- Check a smell variant against the targets yourself: it must miss one by
+  more than a line or two, or it may pass the structural checks.
 
 ## Runnable examples and quiz code
 

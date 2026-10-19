@@ -28,8 +28,18 @@ either, include only what that side needs, never the other side's code.
 
 ## 2. Lesson
 
+In a `refactor` module, and in an `implement` module with given code (the
+outline's `exercise` has the learner write tests for existing code; see
+`spec/exercises.md`, "Starter files"), first start the **smell-author** with
+the course folder and module ID. It writes the code in `exercise/`: in a
+refactor module, the legacy starter code and the task statement; with given
+code, only the given code. Read its report; if a target looks too loose or
+too tight, ask it to adjust before going on.
+
 Start the **lesson-writer** with the course folder and module ID. It writes
-the lesson, the challenge and exercise starter files, and the quiz.
+the lesson, the challenge and exercise starter files (in a refactor module,
+the challenges only; with given code, the learner's test file next to it),
+and the quiz.
 
 ## 3. Facts, tests and solution, in parallel
 
@@ -42,9 +52,11 @@ the course folder and module ID:
 - **solution-author**
 
 If either author reports a gap in the starter documentation, the
-lesson-writer fixes the documentation; then tell both authors what changed so
-they re-check their files. Do the same whenever a fix changes the starter
-documentation.
+lesson-writer fixes the documentation (in a refactor module, the
+smell-author fixes the task statement in `exercise/`; with given code, the
+smell-author fixes the given code's docstrings); then tell both authors
+what changed so they re-check their files. Do the same whenever a fix changes
+the starter documentation.
 
 ## 4. Validate and fix
 
@@ -60,6 +72,11 @@ Send each problem to the agent that can fix it:
 | a test passes on the starter files; a test without an objective; an objective no test checks | test-author |
 | a broken variant no test catches | test-author, with the variant's `Broken variant:` line only |
 | a variant that changes nothing, breaks a challenge test, or a unit with no variant | solution-author |
+| refactor: a behaviour test fails on the starter; any other test passes on it | test-author |
+| refactor: a `behaviour` variant no behaviour test catches; a `smell` variant no structural check catches | test-author, with the variant's `Broken variant:` line only |
+| refactor: a variant without a kind, no variant of one kind, a `smell` variant that fails a behaviour test | solution-author |
+| refactor: a target the starter already meets or a good refactoring can't meet; a gap in the task statement | smell-author |
+| given code: its docstrings are unclear or don't match what it does | smell-author |
 | the solution fails a test | you decide, below |
 
 **When the solution fails a test,** read the failure message and the
@@ -71,6 +88,10 @@ starter documentation of that unit, and decide which side is wrong:
   documentation says B, yours returns C", without the test's code.
 - **The documentation is unclear:** the lesson-writer clarifies it, then
   both authors re-check.
+
+In a refactor module, a behaviour test that fails on the solution has
+already passed on the starter, so the solution changed the behaviour: tell
+the solution-author the input and what the starter gives for it.
 
 Then validate again. Sending the problems out and validating again is one
 **fix round**. A build gets **at most 3 fix rounds** in total, including

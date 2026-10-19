@@ -60,7 +60,8 @@
           "minLength": 1
         },
         "exercise_type": {
-          "enum": ["implement"]
+          "description": "Names the file in spec/exercise-types/ that applies.",
+          "enum": ["implement", "refactor"]
         },
         "introduces": {
           "description": "Concepts this module teaches for the first time.",

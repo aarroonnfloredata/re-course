@@ -1,4 +1,5 @@
-"""Find and load a course: course.yaml, then each module's module.yaml."""
+"""Find and load a course: course.yaml, then each module's module.yaml when
+it is needed."""
 
 import re
 from dataclasses import dataclass
@@ -27,13 +28,19 @@ class Module:
 class Course:
     root: Path
     title: str
-    modules: list[Module]
+    module_ids: list[str]  # in course order
+
+    def modules(self):
+        """The modules in course order, each loaded when it is reached, so the
+        modules before one that isn't built yet still work."""
+        for module_id in self.module_ids:
+            yield load_module(self.root / "modules" / module_id)
 
     def find_module(self, name):
         """Find a module by its ID or its number, e.g. "01-strings" or "01"."""
-        for module in self.modules:
-            if name == module.id or module.id.startswith(f"{name}-"):
-                return module
+        for module_id in self.module_ids:
+            if name == module_id or module_id.startswith(f"{name}-"):
+                return load_module(self.root / "modules" / module_id)
         return None
 
 
@@ -52,11 +59,8 @@ def find_root(start):
 def load_course(root):
     root = Path(root)
     data = read_yaml(root / COURSE_FILE)
-    modules = [
-        load_module(root / "modules" / module_id)
-        for module_id in require(data, "modules", root / COURSE_FILE)
-    ]
-    return Course(root=root, title=require(data, "title", root / COURSE_FILE), modules=modules)
+    return Course(root=root, title=require(data, "title", root / COURSE_FILE),
+                  module_ids=require(data, "modules", root / COURSE_FILE))
 
 
 def load_module(path):

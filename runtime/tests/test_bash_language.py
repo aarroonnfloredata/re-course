@@ -15,7 +15,7 @@ BROKEN_VARIANTS = sorted(path.name for path in (BASH_MODULE / "broken").iterdir(
 
 @pytest.fixture
 def module(bash_course_dir):
-    return load_course(bash_course_dir).modules[0]
+    return load_course(bash_course_dir).find_module("01")
 
 
 def test_run_snippet():

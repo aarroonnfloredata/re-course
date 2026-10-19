@@ -63,6 +63,28 @@ def test_html_selector_that_matches_nothing():
         html.convert(PAGE, selector="#missing")
 
 
+def test_html_text_before_the_first_heading_gets_a_top_section():
+    page = ("<html><head><title>Code smell - Wikipedia</title></head><body>"
+            "<h1>Code smell</h1><main><p>A smell is a hint.</p>"
+            "<h2 id='Definition'>Definition</h2><p>More.</p></main></body></html>")
+    markdown = html.convert(page).markdown
+    assert markdown == ("## Code smell {#top}\n\nA smell is a hint.\n\n"
+                        "## Definition {#Definition}\n\nMore.\n")
+
+
+def test_html_without_text_before_the_first_heading_has_no_top_section():
+    page = "<body><main><!-- note --> <span id='x'></span><h2>Only</h2><p>Text</p></main></body>"
+    assert html.convert(page).markdown == "## Only {#x}\n\nText\n"
+
+
+def test_html_exclude():
+    page = ("<body><main><div class='crumbs'>Home</div><h2>Kept</h2>"
+            "<div class='ad'>Buy now</div><p>Text</p></main></body>")
+    converted = html.convert(page, exclude=[".crumbs", ".ad", ".missing"])
+    assert converted.markdown == "## Kept {#kept}\n\nText\n"
+    assert converted.warnings == ["exclude '.missing' matches nothing on the page"]
+
+
 def test_html_without_a_main_element_warns():
     converted = html.convert("<body><h2>Title</h2><p>Text</p></body>")
     assert "used the whole page" in converted.warnings[0]

@@ -16,9 +16,11 @@ documentation, not from an implementation.
 - `spec/README.md`, `spec/exercises.md` and
   `spec/exercise-types/<exercise_type>.md`.
 - `.claude/skills/lang-<language>/SKILL.md` for the course's language.
-- The golden module's `tests/`
-  (`examples/python/implement-strings/modules/01-strings/tests/`); the skill
-  says which files to copy unchanged.
+- The golden module's `tests/` for the module's `exercise_type`
+  (`examples/python/implement-strings/modules/01-strings/tests/` or
+  `examples/python/refactor-long-method/modules/01-long-method/tests/`); the
+  skill says which files to copy unchanged.
+- Refactor modules: `.claude/skills/exercise-refactor/SKILL.md`.
 - This module: `module.yaml` (the objectives), `lesson.md` (each challenge's
   text), `challenges/` and `exercise/`.
 
@@ -37,6 +39,25 @@ documentation, not from an implementation.
   empty input, wrong end of a sequence. Another agent writes broken variants
   independently, and your tests must catch every one of them.
 
+In a refactor module, the exercise tests are of two kinds:
+
+- **Behaviour tests** in `test_behaviour`: they pin down what the starter
+  code does through the interface the task says must stay. Get every
+  expected value by running the starter, and cover every branch, boundary
+  and odd case a refactoring step could break.
+- **Structural checks** (`test_structure`): one per target the task states,
+  testing properties, never one particular design. Tests of a new
+  requirement go in `test_extension`.
+
+In an implement module with given code (`spec/exercises.md`, "Starter
+files"), the learner writes tests and your exercise tests check them, as the
+language skill shows: each learner test must make the call its
+documentation names and pass on the given code, and fail on altered copies
+of it. Write the altered copies: each a plausible regression that changes
+one behaviour, and at least one aimed at each learner test. Where the test
+file's rules allow it, also run the learner's tests on a copy refactored
+without changing any result, where they must still pass.
+
 If the starter documentation is ambiguous or leaves a behaviour open, don't
 guess: report it, so the starter files get fixed.
 
@@ -47,10 +68,16 @@ guess: report it, so the starter files get fixed.
 behaviour, add a test for it. If it doesn't, report that the documentation
 needs to state it.
 
+In a refactor module: for a `behaviour` variant, pin the starter's behaviour
+on the path it describes. For a `smell` variant, tighten the structural check
+for the target it misses; if no target in the task rules it out, report that
+the task statement needs one.
+
 ## Check, then report
 
 In the course folder, `uv run learn check <module>` must show every test
-failing on the starter files, each with a plain message. Then run
+failing on the starter files, each with a plain message; in a refactor
+module, every behaviour test passes there and every other test fails. Then run
 `uv run python -m forge.validate workspace/<course> <module> --static`.
 
 Report briefly: the files you wrote, any gaps in the starter documentation,

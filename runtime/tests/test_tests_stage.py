@@ -9,7 +9,7 @@ BROKEN_VARIANTS = sorted(path.name for path in (GOLDEN_MODULE / "broken").iterdi
 
 @pytest.fixture
 def module(course_dir):
-    return load_course(course_dir).modules[0]
+    return load_course(course_dir).find_module("01")
 
 
 def test_starter_fails_every_part(module):

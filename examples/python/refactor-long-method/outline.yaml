@@ -1,0 +1,24 @@
+modules:
+  - id: 01-long-method
+    title: "Long Functions and Extract Method"
+    exercise_type: refactor
+    introduces: [refactoring, code smells, Long Method, Extract Method]
+    objectives:
+      - "Say what refactoring is: changing code's structure so it behaves the same as before"
+      - "Recognise a long function as a code smell: a hint that something may be wrong, not a bug"
+      - "Apply Extract Method: move part of a long function into a new, well-named function and call it"
+      - "Refactor in small steps, running the tests after each one and undoing a step that breaks them"
+    prerequisites: []
+    sources: [wiki-refactoring#Motivation, wiki-refactoring#Benefits, wiki-refactoring#Testing, wiki-refactoring#Transformations, wiki-code-smell#Definition]
+    exercise: >-
+      Refactor print_receipt() in exercise/receipt.py, a long function that
+      lists an order's items, applies a discount code, works out shipping
+      and prints the totals, into short, well-named functions that print the
+      same receipt.
+left_out:
+  - section: wiki-refactoring#Hardware_refactoring
+    reason: "about hardware description languages, not Python code"
+  - section: wiki-refactoring#Tools
+    reason: "editor and tool support; the module practises refactoring by hand"
+  - section: wiki-code-smell#Class-level_smells
+    reason: "class-level smells need other refactorings than Extract Method"

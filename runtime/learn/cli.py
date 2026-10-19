@@ -139,7 +139,7 @@ def print_advice(module, parts):
 
 def current_module(course):
     """Return the first module, in course order, with a failing test, and its results."""
-    for module in course.modules:
+    for module in course.modules():
         results = tests.run(module)
         if not tests.all_passed(results):
             return module, results

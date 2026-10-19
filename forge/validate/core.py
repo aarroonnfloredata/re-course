@@ -133,6 +133,10 @@ def check_brief(brief, section):
         for optional in ("license", "selector"):
             if optional in source and not (isinstance(source[optional], str) and source[optional].strip()):
                 section.add(f"brief.yaml: sources/{index}: {optional} must be text")
+        if "exclude" in source and not (
+                isinstance(source["exclude"], list) and source["exclude"]
+                and all(isinstance(item, str) and item.strip() for item in source["exclude"])):
+            section.add(f"brief.yaml: sources/{index}: exclude must be a list of CSS selectors")
         if "restricted" in source and not isinstance(source["restricted"], bool):
             section.add(f"brief.yaml: sources/{index}: restricted must be true or false")
     return ids
@@ -516,25 +520,12 @@ def jobs(module):
         "lint": {"kind": "lint", "language": language, "folder": str(module.dir),
                  "files": [f"solution/{path}" for path in files_under(module.dir / "solution")]},
     }
-    for path in module.learner_files:
-        if path.startswith("exercise/"):
-            found[f"stubs:{path}"] = {"kind": "stubs", "language": language,
-                                      "file": str(module.dir / path)}
-    for variant, paths in module.variants.items():
-        for path in paths:
-            original = module.dir / "solution" / path
-            if path in module.learner_files and original.is_file():
-                found[f"changed:{variant}:{path}"] = {
-                    "kind": "changed", "language": language, "original": str(original),
-                    "changed": str(module.dir / "broken" / variant / path),
-                }
     return found
 
 
 def check_results(module, results):
     sections = [check_examples(module, results["snippets"]),
-                check_tests(module, results),
-                check_variant_coverage(module, results)]
+                check_tests(module, results)]
     if results["lint"] is not None:  # None: the language has no linter
         sections.append(check_lint(results["lint"]))
     return sections
@@ -607,28 +598,6 @@ def check_lint(result):
     for finding in result:
         section.add(finding)
     section.note = "on solution/"
-    return section
-
-
-def check_variant_coverage(module, results):
-    section = Section("variant coverage")
-    units, changed_by = [], {}
-    for name, result in results.items():
-        if name.startswith("stubs:") and not job_failed(result, section):
-            units += result
-        elif name.startswith("changed:") and not job_failed(result, section):
-            _, variant, path = name.split(":", 2)
-            if not result:
-                section.add(f"broken/{variant}/{path}: changes no function or script of "
-                            "the solution")
-            for unit in result:
-                changed_by.setdefault(unit, []).append(variant)
-    if not units:
-        section.add("exercise/: no stubs found; each unit the learner writes must be a stub")
-    for unit in units:
-        if unit not in changed_by:
-            section.add(f"no broken variant changes {unit}")
-    section.note = f"{len(units)} units in exercise/"
     return section
 
 
